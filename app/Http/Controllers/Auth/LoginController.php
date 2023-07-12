@@ -12,6 +12,8 @@ use App\Models\Userloginlog;
 use App\Models\ModulePermission;
 use App\Models\AdminMenu;
 use App\Models\Permission;
+use App\Models\Mpin;
+use App\Models\Tpin;
 use App\Models\AdminMenuPermission;
 use App\Models\UserPasswordDetails as UserPassword;
 use Illuminate\Support\Facades\Auth;
@@ -22,8 +24,7 @@ use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-    use CommonTrait;
-
+    use CommonTrait; 
     public function index(Request $request)
     {
         try {
@@ -209,15 +210,13 @@ class LoginController extends Controller
         } catch (\Throwable $th) {
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
-    }
-
+    } 
     protected function sendverificationotp($req)
     {
         $otp = 1234;
         Otp::create(['name' => $req['name'], 'status' => 1, 'otptype' => $req['otptype'], 'otp' => $otp]);
         return true;
-    }
-
+    } 
     public function verifyOtp(Request $request)
     {
         try {
@@ -381,16 +380,13 @@ class LoginController extends Controller
         } catch (\Throwable $th) {
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
-    }
-
-
+    } 
     protected function validateOtp($req)
     {
         Userloginlog::create(['userid' => $req['userid'], 'ipaddress' => $req['ipaddress'], "latlng" => $req['latlng'], 'device_name' => $req['device_name']]);
         $getOtp = Otp::select("*")->where('name', $req['email'])->where('otptype', 'login')->orderBy('created_at', 'desc')->first();
         return $getOtp;
-    }
-
+    } 
     public function logout()
     {
         try {
@@ -399,9 +395,7 @@ class LoginController extends Controller
         } catch (\Throwable $th) {
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
-    }
-
-
+    } 
     public function loginlogs($req)
     {
         Userloginlog::create(['userid' => $req['userid'], 'ipaddress' => $req['ipaddress'], "latlng" => $req['latlng'], 'device_name' => $req['device_name']]);
@@ -677,6 +671,190 @@ class LoginController extends Controller
             ];
         }
         return $this->response('success', $res);
+    }
+
+    public function addmpin(Request $request){
+        try { 
+            $validatorArray = [
+                "user_id" => 'required|unique:user_mpin', 
+                "mpin" => 'required|digits:4'
+            ]; 
+            $validator = Validator::make($request->all(), $validatorArray);
+            if ($validator->fails()) {
+                $message = $this->validationResponse($validator->errors());
+                return $this->response('validatorerrors', $message);
+            }
+            $Userdata = User::select("*")->where("id", $request->user_id)->first(); 
+            if($Userdata){
+                $user_Mpin              = new Mpin;
+                $user_Mpin->user_id     = $request->user_id;
+                $user_Mpin->mpin    = $request->mpin;
+                $user_Mpin->expired_at  = date('Y-m-d', strtotime("+30 days"));
+                $user_Mpin->status     = 1;
+                $user_Mpin->save(); 
+                if($user_Mpin){
+                    return $this->response('success', ['message' => 'MPIN set successfully']);
+                }else{
+                    $response = [
+                        'errors' => "invalid!",
+                        'message' => "Some Error Occured!"
+                    ];
+                    return $this->response('notvalid', $response);   
+                }
+            }else{
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "Invalid user!!"
+                ];
+                return $this->response('notvalid', $response);  
+            }
+            
+        } catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]);
+        }
+    }
+
+    public function addtpin(Request $request){
+        try { 
+            $validatorArray = [
+                "user_id" => 'required|unique:user_Tpin', 
+                "tpin" => 'required|digits:6'
+            ]; 
+            $validator = Validator::make($request->all(), $validatorArray);
+            if ($validator->fails()) {
+                $message = $this->validationResponse($validator->errors());
+                return $this->response('validatorerrors', $message);
+            }
+            $Userdata = User::select("*")->where("id", $request->user_id)->first(); 
+            if($Userdata){
+                $user_Tpin              = new Tpin;
+                $user_Tpin->user_id     = $request->user_id;
+                $user_Tpin->tpin        = $request->tpin;
+                $user_Tpin->expired_at  = date('Y-m-d', strtotime("+15 days"));
+                $user_Tpin->status      = 1;
+                $user_Tpin->save(); 
+                if($user_Tpin){
+                    return $this->response('success', ['message' => 'TPIN set successfully']);
+                }else{
+                    $response = [
+                        'errors' => "invalid!",
+                        'message' => "Some Error Occured!"
+                    ];
+                    return $this->response('notvalid', $response);   
+                }
+            }else{
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "Invalid user!!"
+                ];
+                return $this->response('notvalid', $response);  
+            }
+            
+        } catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]);
+        }
+    } 
+    public function changeMpin(Request $request){
+        try { 
+            $validatorArray = [
+                "userid" => 'required',
+                "otp" => 'required|digits_between:4,6',
+                'newmpin'     => 'required|digits_between:4,4|integer',
+                'confirm_newmpin' => 'required|same:newmpin|digits_between:4,4',
+            ]; 
+            $validator = Validator::make($request->all(), $validatorArray);
+            if ($validator->fails()) {
+                $message = $this->validationResponse($validator->errors());
+                return $this->response('validatorerrors', $message);
+            }
+            $Userdata = Mpin::select("*")->where("user_id", $request->userid)->first(); 
+            $to = date('Y-m-d h:i:sa');
+            $from = date("Y-m-d h:i:sa", strtotime("-6 months", strtotime(date('Y-m-d'))));
+            $allPswds = Mpin::where('user_id', $Userdata->user_id)->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->get();
+            $allreadyUsed = false;
+            foreach ($allPswds as $post) {
+                if (($request->newmpin == $post->mpin)) {
+                    $allreadyUsed = true;
+                    break;
+                }
+            }
+              //return if password already used within last 6 months
+              if ($allreadyUsed) {
+                return $this->response('updateError', ['message' => 'Already used MPIN within last 6 months. Choose New One!']);
+            } 
+             //make all old Mpin inactive
+             Mpin::where('user_id', $Userdata->user_id)->update(['status' => 0]); 
+            //Create a new MPIN
+                $user_Mpin = new Mpin; 
+                $user_Mpin->user_id = $Userdata->user_id; 
+                $user_Mpin->mpin    = $request->newmpin;
+                $user_Mpin->expired_at  = date("Y-m-d", strtotime("+1 months", strtotime(date('Y-m-d'))));
+                $user_Mpin->status     = 1;
+                $user_Mpin->save();
+                if($user_Mpin){
+                    return $this->response('success', ['message' => 'MPIN set successfully']);
+                }else{
+                    $response = [
+                        'errors' => "invalid!",
+                        'message' => "Some Error Occured!"
+                    ];
+                    return $this->response('notvalid', $response); 
+                }
+               
+        } catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]);
+        } 
+    }
+    public function changeTpin(Request $request){
+        try { 
+            $validatorArray = [
+                "userid" => 'required',
+                "otp" => 'required|digits_between:4,6',
+                'newtpin'     => 'required|digits_between:6,6|integer',
+                'confirm_newtpin' => 'required|same:newtpin|digits_between:6,6',
+            ]; 
+            $validator = Validator::make($request->all(), $validatorArray);
+            if ($validator->fails()) {
+                $message = $this->validationResponse($validator->errors());
+                return $this->response('validatorerrors', $message);
+            }
+            $Userdata = Tpin::select("*")->where("user_id", $request->userid)->first(); 
+            $to = date('Y-m-d h:i:sa');
+            $from = date("Y-m-d h:i:sa", strtotime("-6 months", strtotime(date('Y-m-d'))));
+            $allPswds = Tpin::where('user_id', $Userdata->user_id)->whereDate('created_at', '>=', $from)->whereDate('created_at', '<=', $to)->get();
+            $allreadyUsed = false;
+            foreach ($allPswds as $post) {
+                if (($request->newtpin == $post->tpin)) {
+                    $allreadyUsed = true;
+                    break;
+                }
+            }
+              //return if password already used within last 6 months
+              if ($allreadyUsed) {
+                return $this->response('updateError', ['message' => 'Already used TPIN within last 6 months. Choose New One!']);
+            } 
+             //make all old Mpin inactive
+             Tpin::where('user_id', $Userdata->user_id)->update(['status' => 0]); 
+            //Create a new TPIN
+                $user_Tpin = new Tpin; 
+                $user_Tpin->user_id = $Userdata->user_id; 
+                $user_Tpin->tpin    = $request->newtpin;
+                $user_Tpin->expired_at  = date("Y-m-d", strtotime("+15 days", strtotime(date('Y-m-d'))));
+                $user_Tpin->status     = 1;
+                $user_Tpin->save();
+                if($user_Tpin){
+                    return $this->response('success', ['message' => 'TPIN set successfully']);
+                }else{
+                    $response = [
+                        'errors' => "invalid!",
+                        'message' => "Some Error Occured!"
+                    ];
+                    return $this->response('notvalid', $response); 
+                }
+               
+        } catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]);
+        } 
     }
 
 

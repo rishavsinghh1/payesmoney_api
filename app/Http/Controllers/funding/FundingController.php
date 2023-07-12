@@ -293,10 +293,29 @@ class FundingController extends Controller
                     $requestdata["addeddate"] =  date('Y-m-d');
                     $requestdata["depositeddate"] =  date('Y-m-d'); 
                     $Addcredit = Creditrequest::insert($requestdata);  
-                    // $insertId =DB::getPdo()->lastInsertId();
-                    // if($Addcredit){
-                        $response = $this->transferLoadfund(8);
-                        dd($response);
+                    $insertId =DB::getPdo()->lastInsertId();
+                    if($Addcredit){
+                        $response = $this->transferLoadfund($insertId);
+                        if($response['status']){
+                            $response = [
+                                'message' => $response['message'],
+                                'newbalance'=>$response['newbalance']
+                            ];
+                            return $this->response('success', $response);
+                        }else { 
+                            $response = [
+                                'errors' => "invalid!",
+                                'message' => $response['message']
+                            ];
+                            return $this->response('notvalid', $response); 
+                        } 
+                    }else{
+                        $response = [
+                            'errors' => "invalid!",
+                            'message' => "Some Error Occured!! contact service Provider!"
+                        ];
+                        return $this->response('notvalid', $response); 
+                    }
                     
                 } catch (\Throwable $th) {
                     return $this->response('internalservererror', ['message' => $th->getMessage()]);
@@ -323,6 +342,132 @@ class FundingController extends Controller
         return $this->response('notvalid', $response);  
        }
     }
-    
+    public function approve(Request $request){
+        $userdata = Auth::user();   
+        if ($userdata) {
+         if ($userdata && in_array($userdata->role, array(1,2))) { 
+                 try {
+                     $validated = Validator::make($request->all(), [
+                         'id'       => 'required', 
+                         "status"   => 'required',
+                         "remarks"  => 'required'
+                         
+                     ]);
+                     if ($validated->fails()) {
+                         $message   = $this->validationResponse($validated->errors());
+                         return $this->response('validatorerrors', $message);
+                     } 
+                    $cr = $this->getFundById($request->id); 
+                    $remarks = $cr->referencenumber . "-" . $cr->requestremark. '-' .$request->remarks;
+                    if (!empty($cr) && $cr->status == 2 && $request->status == "approved") { 
+                        $requestdata = array(
+                            "requestid" => $cr->id,
+                            "remarks" => $remarks,
+                            "comment" => $request->remarks,
+                            "debitorid" => $this->GetuserId("ADMIN"),
+                            "creditorid" => $cr->userid,
+                            "ipaddress" => $_SERVER['REMOTE_ADDR'],
+                            "ttype" => 0,
+                            "processby" => $userdata->id
+                        );
+                         $response = $this->approverequest($requestdata); 
+                        if ($response['status']) {
+                            $response = [
+                                'message' => "Fund request is " . $request->status . " successfully"
+                            ];
+                            return $this->response('success', $response); 
+                        } else {
+                            $response = [
+                                'errors' => "invalid!",
+                                'message' => $response['message']
+                            ];
+                            return $this->response('notvalid', $response);  
+                        }
+                    }elseif ($request->status== "rejected") {
+                        $requestdata = array("requestremark" => $remarks, "acomment" => $request->remarks, "debitor" =>self::GetuserId('ADMIN'), 'status' => 0);
+                        $reject = $this->rejectrequest($requestdata , $cr->id);
+                        if ($reject) {
+                            $response = [
+                                'message' => "Fund request is " . $request->status . " successfully"
+                            ];
+                            return $this->response('success', $response); 
+                        } else {
+                            $response = [
+                                'errors' => "invalid!",
+                                'message' => $response['message']
+                            ];
+                            return $this->response('notvalid', $response);  
+                        }
+                    }else {
+                        $response = [
+                            'errors' => "invalid!",
+                            'message' => "unable to find this request"
+                        ];
+                        return $this->response('notvalid', $response);  
+                    } 
+                 } catch (\Throwable $th) {
+                     return $this->response('internalservererror', ['message' => $th->getMessage()]);
+                 } 
+         }else { 
+             $response = [
+                 'errors' => "invalid!",
+                 'message' => "You are not allowed to approve this fund request"
+             ];
+             return $this->response('notvalid', $response); 
+         } 
+        }else{
+         $response = [
+             'errors' => "invalid!",
+             'message' => "Some Error Occure !! Re-login"
+         ];
+         return $this->response('notvalid', $response);  
+        }
+    }
+
+    public function getFundingRequestDetail(Request $request){
+        $userdata = Auth::user();   
+        if ($userdata) {
+         if ($userdata && in_array($userdata->role, array(1,2))) { 
+                 try {
+                     $validated = Validator::make($request->all(), [
+                         'id'       => 'required',  
+                         
+                     ]);
+                     if ($validated->fails()) {
+                         $message   = $this->validationResponse($validated->errors());
+                         return $this->response('validatorerrors', $message);
+                     } 
+                    $getSingleRequest = $this->getSingleRequest($request->id); 
+                    if($getSingleRequest){
+                        $response = [
+                            'message' => "Data Found",
+                            'data'    =>$getSingleRequest
+                        ];
+                        return $this->response('success', $response);
+                    }else { 
+                        $response = [
+                            'errors' => "invalid!",
+                            'message' => "No data Found!"
+                        ];
+                        return $this->response('notvalid', $response); 
+                    } 
+                 } catch (\Throwable $th) {
+                     return $this->response('internalservererror', ['message' => $th->getMessage()]);
+                 } 
+         }else { 
+             $response = [
+                 'errors' => "invalid!",
+                 'message' => "You are not allowed to approve this fund request"
+             ];
+             return $this->response('notvalid', $response); 
+         } 
+        }else{
+         $response = [
+             'errors' => "invalid!",
+             'message' => "Some Error Occure !! Re-login"
+         ];
+         return $this->response('notvalid', $response);  
+        }
+    }
 
 }

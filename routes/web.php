@@ -23,6 +23,11 @@ $router->get('/', function () use ($router) {
         $router->post('verifyOtp', 'Auth\ResetController@verifyOtp');
         $router->post('forgotPassword', 'Auth\ResetController@forgotPassword');
         $router->post('forgotPasswordEmail', 'Auth\ResetController@forgotPasswordMail');
+        $router->post('addmpin', 'Auth\LoginController@addmpin');
+        $router->post('addtpin', 'Auth\LoginController@addtpin');
+        $router->post('changeMpin', 'Auth\LoginController@changeMpin');
+        $router->post('changeTpin', 'Auth\LoginController@changeTpin');
+        
         $router->group(['middleware' => ['auth:api']], function () use ($router) { 
             $router->post('logout', 'Auth\LoginController@logout');
         });
@@ -151,24 +156,44 @@ $router->get('/', function () use ($router) {
             $router->post('create', 'User\REATILER\RetailerController@create');  
             
         });
-        $router->group(['prefix' => 'retailer'], function () use ($router) { 
-            $router->post('create', 'User\REATILER\RetailerController@create');  
-            
-        });
+         
         $router->group(['prefix' => 'funding'], function () use ($router) { 
             $router->post('create', 'funding\FundingController@create');  
             $router->post('addfund', 'funding\FundingController@AdminAddFund');  
             $router->post('addfundsuperadmin', 'funding\FundingController@addfundsuperadmin');  
             $router->post('transferfund', 'funding\FundingController@transferfund');  
+            $router->post('approve', 'funding\FundingController@approve');  
+            $router->post('getFundingRequestDetail', 'funding\FundingController@getFundingRequestDetail');
+            
+        });
+        $router->group(['prefix' => 'commission'], function () use ($router) {
+            $router->post('list', ['as' => 'list', 'uses' => 'Commission\Template@list']); 
+            $router->post('getbyid', ['as' => 'getbyid', 'uses' => 'Commission\Template@getbyid']); 
+            $router->post('create', ['as' => 'create', 'uses' => 'Commission\Template@create']); 
+            $router->post('update', ['as' => 'update', 'uses' => 'Commission\Template@update']);  
+
+            $router->post('getuserlist', ['as' => 'getuserlist', 'uses' => 'Commission\Commission@getuserlist']);
+            $router->post('getassignedCommission', ['as' => 'getassignedCommission', 'uses' => 'Commission\Commission@getassignedCommission']); 
+            $router->post('assigntempcomm', ['as' => 'assigntempcomm', 'uses' => 'Commission\Commission@assigntempcomm']);  
+        });
+        $router->group(['prefix' => 'permission'], function () use ($router) {
+            $router->post('list', ['as' => 'list', 'uses' => 'Permission\PermissionController@Permissionlist']);  
+            $router->post('update', ['as' => 'update', 'uses' => 'Permission\PermissionController@Permissionupdate']); 
+            
+        });
+        $router->group(['prefix' => 'company-bank'], function () use ($router) {
+            $router->post('getlist', ['as' => 'list', 'uses' => 'Companybank\BankController@getlist']);  
+            //$router->post('update', ['as' => 'update', 'uses' => 'Permission\PermissionController@Permissionupdate']); 
             
         });
 
-
+        
+        
 
         
     }); 
  
-
+        
     
     
 // });
@@ -199,7 +224,7 @@ $router->group(['prefix' => 'api', 'middleware' => ['auth:api', 'crypt', 'logs']
     $router->post('role/delete', ['as' => 'role-delete', 'uses' => 'Auth\PermissionController@deleteRole']);
     $router->post('role/list', ['as' => 'role-list', 'uses' => 'Auth\PermissionController@RoleList']);
     $router->post('role/view', ['as' => 'role-view', 'uses' => 'Auth\PermissionController@getRoleById']);
- 
+    /*.....................@role............................ */
    
 });
     
