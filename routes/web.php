@@ -144,6 +144,15 @@ $router->get('/', function () use ($router) {
         });
     });
     $router->group(['middleware' => 'auth:api'], function () use ($router) { 
+
+
+        $router->group(['prefix' => 'recharge'], function () use ($router) { 
+            $router->post('dorecharge', 'Recharge\Prepaidrecharge@dorecharge');
+            $router->post('getoperator', 'Recharge\Prepaidrecharge@getoperator');  
+            
+        });
+
+        
         $router->group(['prefix' => 'superdist'], function () use ($router) { 
             $router->post('create', 'User\SD\SuperDistController@create');  
             

@@ -1,0 +1,4 @@
+2023-07-14 23:55:56 REQUEST1689359156: {"method":"POST","apiname":"Recharge","url":"https:\/\/uat.bestapi.in\/web-api\/api\/v1\/recharge","parameter":{"mobileno":9934464262,"amount":5,"operator":"AT","reqId":11}} 
+2023-07-14 23:55:58 RESPONSE1689359156: {"statuscode":422,"status":false,"responsecode":2,"errors":{"amount":"The amount must be at least 10.\u003Cbr \/\u003E"},"message":"Validation errors!!"} 
+2023-07-14 23:56:21 REQUEST1689359181: {"method":"POST","apiname":"Recharge","url":"https:\/\/uat.bestapi.in\/web-api\/api\/v1\/recharge","parameter":{"mobileno":9934464262,"amount":10,"operator":"AT","reqId":12}} 
+2023-07-14 23:56:23 RESPONSE1689359181: {"statuscode":422,"status":false,"responsecode":2,"errors":"Invalid!","msg":"Authorised key and Request Id is Required!!"} 
