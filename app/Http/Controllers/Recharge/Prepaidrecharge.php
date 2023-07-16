@@ -26,7 +26,7 @@ class Prepaidrecharge extends Controller
     {
         try {
             $validated = Validator::make($request->all(), [ 
-                "operator"     => 'required|max:3|min:2',
+                "operator"     => 'required|max:4|min:2',
                 "mobile"      => 'required|digits:10|numeric',
                 "amount"    => 'required||numeric|gt:0',
                 "referenceid"    => 'required', 
