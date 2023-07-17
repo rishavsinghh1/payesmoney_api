@@ -42,7 +42,7 @@ class Rechargelib{
            CURLOPT_RETURNTRANSFER => true,
            CURLOPT_ENCODING => "",
            CURLOPT_MAXREDIRS => 10,
-           CURLOPT_TIMEOUT => 15,
+           CURLOPT_TIMEOUT => 30,
            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
            CURLOPT_CUSTOMREQUEST => $request['method'],
            CURLOPT_POSTFIELDS => json_encode($request['parameter']),
@@ -52,8 +52,7 @@ class Rechargelib{
              "content-type: application/json"
            ],
          ]);
-         $response = curl_exec($curl); 
-        
+         $response = curl_exec($curl);  
          if(curl_errno($curl)){
              $response   =   self::response(json_encode(array("errorCode"=>"PayesMoney-001","error_code"=>curl_errno($curl),"message"=>curl_error($curl),"errorMessage"=>"Unable to get response please try again later"))); 
          }else if(isset($response) && $response != ""){
