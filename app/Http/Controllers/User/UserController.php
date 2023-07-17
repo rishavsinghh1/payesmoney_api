@@ -9,7 +9,7 @@ use App\Http\Traits\HeaderTrait;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Facades\Auth;
 class UserController extends Controller
 {
     use CommonTrait,HeaderTrait;
@@ -58,14 +58,8 @@ class UserController extends Controller
     public function getUser(Request $request)
     {
         try {
-            $validated = Validator::make($request->all(), [
-                'user_id'   => 'required',
-            ]);
-            if ($validated->fails()) {
-                $message   = $this->validationResponse($validated->errors());
-                return $this->response('validatorerrors', $message);
-            }
-            $user =  User::find($request->user_id);
+             
+            $user = Auth::user(); 
             if($user){
                 return $this->response('success',['data' => $user, 'message' => 'Details fetched successfully!']);
             }else{

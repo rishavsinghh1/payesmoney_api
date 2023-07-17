@@ -148,10 +148,11 @@ $router->get('/', function () use ($router) {
 
         $router->group(['prefix' => 'recharge'], function () use ($router) { 
             $router->post('dorecharge', 'Recharge\Prepaidrecharge@dorecharge');
-            $router->post('getoperator', 'Recharge\Prepaidrecharge@getoperator');  
+            $router->post('getoperator', 'Recharge\Prepaidrecharge@getoperator'); 
+            $router->post('getRoffer', 'Recharge\Prepaidrecharge@getRoffer');  
             
         });
-
+        $router->post('get-user', ['as' => 'user-edit', 'uses' => 'User\UserController@getUser']);
         
         $router->group(['prefix' => 'superdist'], function () use ($router) { 
             $router->post('create', 'User\SD\SuperDistController@create');  

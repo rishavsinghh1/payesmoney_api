@@ -209,4 +209,45 @@ class Prepaidrecharge extends Controller
         }
         
     }
+
+    public function getRoffer(Request $request){
+        try {
+            $userdata = Auth::user();
+            if ($userdata && in_array($userdata->role, array(1,5))) {
+                $reqData = array( 
+                    'canumber'      =>  $request->number, 
+                    'operator'      =>  $request->operator, 
+                    'apiname'       => 'check operator',
+                    'method'        => 'POST'
+                );
+               
+               $data = Rechargelib::docheckRoffer($reqData);
+               
+               if($data){
+                    $response = [
+                        'message' => "SUCCESS",
+                        'responsedata'=>$data
+                    ];
+                    return $this->response('success', $response);
+                   }else{
+                    $response = [
+                        'message' => "FAILED", 
+                        'responsedata'=>$data 
+                    ];
+                    return $this->response('notvalid', $response);
+                   }
+               
+            }else { 
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "Not Authorised!!"
+                ];
+                return $this->response('notvalid', $response); 
+            } 
+            
+        }catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]);
+        }
+        
+    }
 }

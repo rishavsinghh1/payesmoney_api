@@ -126,5 +126,52 @@ class Rechargelib{
         ];
        return self::hittingwithoutkey($data);
     }
+
+    public static function hittingdocheckRoffer($request){ 
+        $num    =   time();
+         self::writelog("REQUEST".$num,$request,$request['apiname']); 
+         $curl = curl_init();
+         curl_setopt_array($curl, [
+           CURLOPT_URL => 'https://api.bestapi.in/api/v1/RofferCheck',
+           CURLOPT_RETURNTRANSFER => true,
+           CURLOPT_ENCODING => "",
+           CURLOPT_MAXREDIRS => 10,
+           CURLOPT_TIMEOUT => 15,
+           CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+           CURLOPT_CUSTOMREQUEST =>'POST',
+           CURLOPT_POSTFIELDS =>json_encode($request['parameter']),
+           CURLOPT_HTTPHEADER => [   
+             "accept: application/json",
+             "content-type: application/json"
+           ],
+         ]);
+         $response = curl_exec($curl); 
+        
+         if(curl_errno($curl)){
+            $response   =   self::response(json_encode(array("errorCode"=>"PayesMoney-001","error_code"=>curl_errno($curl),"message"=>curl_error($curl),"errorMessage"=>"Unable to get response please try again later"))); 
+        }else if(isset($response) && $response != ""){
+              $response   =   self::response($response);
+        }else{
+            $response   =   self::response(json_encode(array("errorCode"=>"PayesMoney-001","error_code"=>90,"message"=>"empty curl response","errorMessage"=>"Unable to get response please try again later"))); 
+        }
+       // dd($response);
+        self::writelog("RESPONSE".$num,$response,$request['apiname']);
+        return $response;
+     }
+    public static function docheckRoffer($request){ 
+        $data = [
+            'method' => $request['method'],
+            'apiname'=> $request['apiname'],
+            'url'    => static::$liveurl.'RofferCheck', 
+            'parameter' => [ 
+                    'mobileno'   => $request['canumber'],
+                    'opcode'     => $request['operator']           
+            ]
+        ];
+        
+       return self::hittingdocheckRoffer($data);
+    }
+
+    
     
 }
