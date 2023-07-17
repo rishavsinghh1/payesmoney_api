@@ -4,9 +4,9 @@ use App\Libraries\Common\Logs;
 use Carbon\Carbon;
 class Rechargelib{
     public static $url = "https://uat.bestapi.in/web-api/api/v1/";
-    public static $liveurl = " https://api.bestapi.in/api/v1/";
+    public static $liveurl = "https://api.bestapi.in/api/v1/";
    
-    public static $authkey = "ZDI1M2Q5NGIwMDBmNTdiZDJiODNjM2FlNGE1NTc0NWE="; 
+    public static $authkey = "MGM4MDQ0ZmQ1NDRlY2ZjOTc2OWZiZWNlYjI4NGZhYWE="; 
     public static $required = array('error_code','errorMessage');
 
     public static function writelog($type,$req,$dirname){
@@ -69,7 +69,7 @@ class Rechargelib{
         $data = [
             'method' => $request['method'],
             'apiname'=> $request['apiname'],
-            'url'    => static::$url.'recharge',
+            'url'    => static::$liveurl.'recharge',
 
             'parameter' => [ 
                     'mobileno'   => $request['canumber'],

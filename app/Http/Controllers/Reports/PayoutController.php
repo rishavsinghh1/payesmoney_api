@@ -20,7 +20,7 @@ class PayoutController extends Controller
     {
         $this->today      = Carbon::now()->toDateString();
         $this->status = ['0'=>'Deleted','1'=>'Active','2'=>'Pending'];  
-        $this->Stmtstatus = ['0'=>'Refund','1'=>'Success','2'=>'Process','3'=>'Pending'];
+        $this->Stmtstatus = ['0'=>'Refund','1'=>'Success','2'=>'Process','3'=>'Failed'];
     }
     
      public function list(Request $request)
@@ -164,6 +164,7 @@ class PayoutController extends Controller
             if(!empty($data)){
                 foreach($data as $key=>$datum){  
                     if($datum->status){
+                        $data[$key]->status =   $this->Stmtstatus[$datum->status];
                         $dateTime = new DateTime($datum->addeddate, new DateTimeZone('Asia/Kolkata'));  
                         // echo $dateTime->format("d/m/y  g:i A");
                         $data[$key]->addeddate =   $dateTime->format("d-m-Y  g:i:s A"); 
