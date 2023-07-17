@@ -4,22 +4,22 @@ namespace App\Http\Controllers\Reports;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\Request;
-use App\Models\Beneficiry;
-use App\Models\BankDetails;
-use App\Models\BankList;
-use App\Models\Payout;
+use Illuminate\Support\Facades\DB; 
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Http\Request; 
 use App\Http\Traits\CommonTrait;
 use App\Http\Traits\HeaderTrait;
 use App\Libraries\Common\Guzzle;
-
+use DateTime;
+use DateTimeZone;
+use Carbon\Carbon;
 class PayoutController extends Controller
 {
     use CommonTrait, HeaderTrait;
     public function __construct()
     {
-        $this->status = ['0'=>'Deleted','1'=>'Active','2'=>'Pending'];
+        $this->today      = Carbon::now()->toDateString();
+        $this->status = ['0'=>'Deleted','1'=>'Active','2'=>'Pending'];  
         $this->Stmtstatus = ['0'=>'Refund','1'=>'Success','2'=>'Process','3'=>'Pending'];
     }
     
@@ -68,61 +68,124 @@ class PayoutController extends Controller
     }
 
 
-    ///statement
-    #Payout statement method.
-    public function statement(Request $request) {
-        try {
-                        
-            $startdate = $request->startdate;
-            $enddate = $request->enddate;
-            $search = $request->searchvalue;
-            $orderby= $request->orderby;
-            $order  = $request->order;
-
-            $startdate = !empty($startdate)?date('Y-m-d',strtotime($startdate)):date('Y-m-d');
-            $enddate = !empty($enddate)?date('Y-m-d',strtotime($enddate)):date('Y-m-d');
-            $searchColumn = ["P.id","P.bene_acc_no","P.amount","P.mode","P.bank_urn","P.utr_rrn",'users.fullname'];
-            $select = ["users.fullname as partner",'P.id','P.refid','P.userid','P.bene_acc_no','P.urn','P.amount','P.mode','P.status','P.remarks','P.bankname', 'P.bene_acc_ifsc', 'P.bank_urn','P.utr_rrn','P.addeddate','P.created_at'];
-            $query = DB::connection('pgsql')->table('payouts as P');
-            $query->select($select);
-            $query->join('users', 'users.id', '=', 'P.userid');
-            $query->whereDate('P.addeddate', '>=', $startdate);
-            $query->whereDate('P.addeddate', '<=', $enddate);
-
-            //$username = "RMY001823";
-            $totalCount = $query->count();
-            if(!empty($search)){
-                $query->where(function($query) use ($searchColumn, $search){
-                    foreach($searchColumn as $column){
-                        $query->orWhere($column, 'like', '%' .  trim($search) . '%');
-                    }
-                });                
-            }
-            (!empty($orderby) && !empty($order))? $query->orderBy("P.".$orderby, $order): $query->orderBy("P.id", "desc");
-            $length = (!empty($request->length))? $request->length: 20;
-            $start  = (!empty($request->start))? $request->start: 0;
-            $list   = $query->skip($start)->take($length)->get();
-
-            foreach($list as $key => $val){
-                $list[$key]->status = $this->Stmtstatus[$val->status];
-                $list[$key]->createdat = date("d-m-Y H:i:s",strtotime($val->created_at));
-                unset($val->created_at);
-                unset($val->users);
-            }
-            $count  = count($list);
-            $header = $this->payoutlist();
-            $details = [
-                "message" => "Payout list.",
-                "recordsFiltered" => $count,
-                "recordsTotal" => $totalCount,
-                "header" => $header,
-                "data" => $list
-            ];
-            return $this->response('success', $details); 
-        } catch (\Exception $e) {
-            return  $this->response('internalservererror', ['message' => $e->getMessage()]);
+    
+    public function record(Request $request)
+    {
+       
+        $startdate     = trim(strip_tags($request->startdate));
+        $enddate       = trim(strip_tags($request->enddate));
+        $searchapi     = trim(strip_tags($request->searchapi)); 
+        $status        = trim(strip_tags($request->status));
+        $userid        = trim(strip_tags($request->userid));
+        $start         = trim(strip_tags($request->start));
+        $length        = trim(strip_tags($request->length));
+        $order         = trim(strip_tags($request->order)); 
+        $search        = trim(strip_tags($request->search));
+        $statename     = trim(strip_tags($request->statename));
+        $operator     = trim(strip_tags($request->operator)); 
+        if(empty($startdate) && empty($enddate)){
+            $startdate = $this->today;
+            $enddate   = $this->today;  
         }
        
-        
+        if(!empty($startdate) && !empty($enddate)){
+            
+            $query = DB::table('users');
+            $query->join('recharge', 'users.id', '=', 'recharge.userid'); 
+            $query->join('transaction_cashdeposit as tb1', 'tb1.id', '=', 'recharge.txnid');
+            $query->leftjoin('transaction_cashdeposit as tb2', 'tb2.id', '=', 'recharge.refundtxnid');
+            $query->select(
+                'recharge.id as id',
+                'recharge.txnid as txnid',  
+                'recharge.canumber as canumber',
+                'recharge.operatorname as operatorname',
+                'recharge.operatorid as operatorid', 
+                'recharge.amount as amount', 
+                'recharge.status as statusval',
+                'recharge.status as status',
+                'recharge.dateadded as addeddate',
+                'users.username as username', 
+                'recharge.comm as comm',      
+                'tb1.cd_opening as opening',
+                'tb1.cd_closing as closing',
+                'tb1.narration as remarks',
+                'tb1.amount as debit', 
+                'tb2.amount  as credit',
+                'tb2.comm  as commcredit',
+                'recharge.updated_at as restime',
+                );
+          
+             
+
+             
+            $query->whereDate('recharge.addeddate', '>=', $startdate);
+            $query->whereDate('recharge.addeddate', '<=', $enddate);
+
+            if ($status != "" ) {
+                $query->where('recharge.status',$status);
+            }
+
+            if ($userid != "") {
+               $query->where('recharge.userid',$userid);
+            }
+            
+
+            (!empty($orderby) && !empty($order))? $query->orderBy('recharge.'.$orderby, $order): $query->orderBy("recharge.id", "desc");
+            $query->where(function ($q) use ($search) {
+                if (!empty($search)) {
+                    $q->orWhere('recharge.canumber', 'LIKE', "%{$search}%");
+                    $q->orWhere('recharge.status', 'LIKE', "%{$search}%"); 
+                    $q->orWhere('recharge.reqid', 'LIKE', "%{$search}%");
+                   $q->orWhere('recharge.txnid', 'LIKE', "%{$search}%"); 
+                }
+                return $q;
+            });
+            
+            if($request->user()->user_type == 5){
+                $userid =  $request->user()->id;
+                $query->where('recharge.userid',$userid);
+            }
+           
+            $totaldata = $query->get()->toArray();
+             
+            $recordsTotal = $query->count();
+            
+             
+            
+            if ($length != "" && $start !="") {
+                $data = $query->skip($start)->take($length)->get()->toArray();
+                $recordsFiltered = count($data);
+            }else{
+                $data = $query->get()->toArray();
+                $recordsFiltered = $query->count();
+            }
+            
+            
+            if(!empty($data)){
+                foreach($data as $key=>$datum){  
+                    if($datum->status){
+                        $dateTime = new DateTime($datum->addeddate, new DateTimeZone('Asia/Kolkata'));  
+                        // echo $dateTime->format("d/m/y  g:i A");
+                        $data[$key]->addeddate =   $dateTime->format("d-m-Y  g:i:s A"); 
+
+                    } 
+                }
+                return $this->response('success', ['message' => "Success.",'data' => $data,'recordsFiltered' => $recordsFiltered,'recordsTotal'    => $recordsTotal]); 
+            }else{
+                return $this->response('noresult', ['statuscode'=>200]); 
+            }
+            
+        }else{
+            $statuscode     = $this->statuscode['noresult'];
+                $this->response = [
+                    'statuscode'   => $statuscode,
+                    'status'       => false,
+                    'responsecode' => 0,
+                    'msg'          => "Please add param.",
+                    
+                ];
+                return response()->json($this->response, $statuscode);
+            
+        }
     }
 }
