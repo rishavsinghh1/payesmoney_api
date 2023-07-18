@@ -1,0 +1,42 @@
+2023-07-18 15:34:28 REQUEST1689674668: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":null,"opcode":"AT"}} 
+2023-07-18 15:34:29 RESPONSE1689674668: {"statuscode":422,"status":false,"responsecode":2,"errors":{"mobileno":"The mobileno must be a number.\u003Cbr \/\u003E"},"message":"Validation errors!!"} 
+2023-07-18 15:34:35 REQUEST1689674675: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":null,"opcode":"AT"}} 
+2023-07-18 15:34:35 RESPONSE1689674675: {"statuscode":422,"status":false,"responsecode":2,"errors":{"mobileno":"The mobileno must be a number.\u003Cbr \/\u003E"},"message":"Validation errors!!"} 
+2023-07-18 15:35:12 REQUEST1689674712: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":9934464262,"opcode":"AT"}} 
+2023-07-18 15:35:13 RESPONSE1689674712: {"statuscode":1,"status":"success","responsecode":200,"data":{"tel":"9934464262","operator":"AT","records":{"status":0,"desc":"Customer Not Found"},"status":1}} 
+2023-07-18 15:35:53 REQUEST1689674753: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":1316254968,"opcode":"TataSky"}} 
+2023-07-18 15:35:55 RESPONSE1689674753: {"statuscode":1,"status":"success","responsecode":200,"data":{"records":{"msg":"Customer information Not Found"},"status":0}} 
+2023-07-18 15:36:19 REQUEST1689674779: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":3041481696,"opcode":"Airteldth"}} 
+2023-07-18 15:36:21 RESPONSE1689674779: {"statuscode":1,"status":"success","responsecode":200,"data":{"tel":"3041481696","operator":"Airteldth","records":[{"Balance":182.51,"customerName":"Shubhan Nirnalkar","NextRechargeDate":"2023-07-28","status":"ACTIVE","planname":"NCF 1M PRNT Rs.122,Hindi Family Plus,Airtel Free Chnls Bundle_ROI","MonthlyRecharge":545}],"status":1}} 
+2023-07-18 21:13:28 REQUEST1689695008: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"02512183002","opcode":"Airteldth"}} 
+2023-07-18 21:13:29 RESPONSE1689695008: {"statuscode":422,"status":false,"responsecode":2,"errors":{"mobileno":"The mobileno must be an integer.\u003Cbr \/\u003E"},"message":"Validation errors!!"} 
+2023-07-18 21:14:02 REQUEST1689695042: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":3041481696,"opcode":"Airteldth"}} 
+2023-07-18 21:14:04 RESPONSE1689695042: {"statuscode":1,"status":"success","responsecode":200,"data":{"tel":"3041481696","operator":"Airteldth","records":[{"Balance":182.51,"customerName":"Shubhan Nirnalkar","NextRechargeDate":"2023-07-28","status":"ACTIVE","planname":"NCF 1M PRNT Rs.122,Hindi Family Plus,Airtel Free Chnls Bundle_ROI","MonthlyRecharge":545}],"status":1}} 
+2023-07-18 21:14:44 REQUEST1689695084: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"3041481696","opcode":"Airteldth"}} 
+2023-07-18 21:14:46 RESPONSE1689695084: {"statuscode":1,"status":"success","responsecode":200,"data":{"tel":"3041481696","operator":"Airteldth","records":[{"Balance":182.51,"customerName":"Shubhan Nirnalkar","NextRechargeDate":"2023-07-28","status":"ACTIVE","planname":"NCF 1M PRNT Rs.122,Hindi Family Plus,Airtel Free Chnls Bundle_ROI","MonthlyRecharge":545}],"status":1}} 
+2023-07-18 22:58:45 REQUEST1689701325: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"02512183002","opcode":"Dishtv"}} 
+2023-07-18 22:58:46 RESPONSE1689701325: {"statuscode":422,"status":false,"responsecode":2,"errors":{"mobileno":"The mobileno must be an integer.\u003Cbr \/\u003E"},"message":"Validation errors!!"} 
+2023-07-18 23:00:23 REQUEST1689701423: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"02512183002","opcode":"Dishtv"}} 
+2023-07-18 23:00:25 RESPONSE1689701423: {"statuscode":1,"status":"success","responsecode":200,"data":{"tel":"02512183002","operator":"Dishtv","records":[{"MonthlyRecharge":421,"Balance":"480.48","customerName":"tarun","status":"Active","NextRechargeDate":"20-08-2023","lastrechargeamount":"421","lastrechargedate":"2023-07-18T11:09:23.487","planname":"HINDI PREMIUM_BSW1 Dec 20 (Mig Feb 23)"}],"status":1}} 
+2023-07-18 23:04:51 REQUEST1689701691: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"10588202688","opcode":"Sundirect"}} 
+2023-07-18 23:04:55 RESPONSE1689701691: {"statuscode":1,"status":"success","responsecode":200,"data":{"tel":"10588202688","operator":"Sundirect","records":[{"MonthlyRecharge":"0","Balance":"4.34","customerName":"SANDHYA","status":"Active","NextRechargeDate":"16-Aug-2023","planname":"Tamil Malayalam J0di Package Subscription Monthly Renewal"}],"status":1}} 
+2023-07-18 23:06:18 REQUEST1689701778: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"1133665867","opcode":"TataSky"}} 
+2023-07-18 23:06:20 RESPONSE1689701778: {"statuscode":1,"status":"success","responsecode":200,"data":{"records":{"msg":"Customer information Not Found"},"status":0}} 
+2023-07-18 23:08:00 REQUEST1689701880: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"1133665867","opcode":"TataSky"}} 
+2023-07-18 23:08:02 RESPONSE1689701880: {"statuscode":1,"status":"success","responsecode":200,"data":{"records":{"msg":"Customer information Not Found"},"status":0}} 
+2023-07-18 23:08:43 REQUEST1689701923: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"1133665867","opcode":"TataSky"}} 
+2023-07-18 23:08:45 RESPONSE1689701923: {"statuscode":1,"status":"success","responsecode":200,"data":{"records":{"msg":"Customer information Not Found"},"status":0}} 
+2023-07-18 23:10:34 REQUEST1689702034: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"1133665867","opcode":"TataSky"}} 
+2023-07-18 23:10:36 RESPONSE1689702034: {"statuscode":1,"status":"success","responsecode":200,"data":{"records":{"msg":"Customer information Not Found"},"status":0}} 
+2023-07-18 23:12:08 REQUEST1689702128: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"1133665867","opcode":"TataSky"}} 
+2023-07-18 23:12:10 RESPONSE1689702128: {"statuscode":1,"status":"success","responsecode":200,"data":{"records":{"msg":"Customer information Not Found"},"status":0}} 
+2023-07-18 23:12:37 REQUEST1689702157: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"1133665867","opcode":"TataSky"}} 
+2023-07-18 23:12:39 RESPONSE1689702157: {"statuscode":1,"status":"success","responsecode":200,"data":{"records":{"msg":"Customer information Not Found"},"status":0}} 
+2023-07-18 23:13:44 REQUEST1689702224: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"1043415197","opcode":"TataSky"}} 
+2023-07-18 23:13:46 RESPONSE1689702224: {"statuscode":1,"status":"success","responsecode":200,"data":{"records":{"msg":"Customer information Not Found"},"status":0}} 
+2023-07-18 23:13:53 REQUEST1689702233: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"","opcode":""}} 
+2023-07-18 23:13:53 RESPONSE1689702233: {"statuscode":422,"status":false,"responsecode":2,"errors":{"opcode":"The opcode field is required.\u003Cbr \/\u003E","mobileno":"The mobileno field is required.\u003Cbr \/\u003E"},"message":"Validation errors!!"} 
+2023-07-18 23:16:58 REQUEST1689702418: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"1043415197","opcode":"TataSky"}} 
+2023-07-18 23:17:00 RESPONSE1689702418: {"statuscode":1,"status":"success","responsecode":200,"data":{"records":{"msg":"Customer information Not Found"},"status":0}} 
+2023-07-18 23:17:23 REQUEST1689702443: {"method":"POST","apiname":"check Dth Details","url":"getDthInfo","parameter":{"mobileno":"3031236020","opcode":"Airteldth"}} 
+2023-07-18 23:17:25 RESPONSE1689702443: {"statuscode":1,"status":"success","responsecode":200,"data":{"tel":"3031236020","operator":"Airteldth","records":[{"Balance":333.79,"customerName":"Kamruddin   Shaikh .","NextRechargeDate":"2023-08-13","status":"ACTIVE","planname":"NCF 1M PRNT Upfront Rs.111,Marathi Premium Family Plus,Airtel Free Chnls Bundle_ROI,FPP Topup","MonthlyRecharge":385}],"status":1}} 

@@ -86,10 +86,8 @@ class PayoutController extends Controller
         if(empty($startdate) && empty($enddate)){
             $startdate = $this->today;
             $enddate   = $this->today;  
-        }
-       
-        if(!empty($startdate) && !empty($enddate)){
-            
+        } 
+        if(!empty($startdate) && !empty($enddate)){ 
             $query = DB::table('users');
             $query->join('recharge', 'users.id', '=', 'recharge.userid'); 
             $query->join('transaction_cashdeposit as tb1', 'tb1.id', '=', 'recharge.txnid');
@@ -131,17 +129,18 @@ class PayoutController extends Controller
             
 
             (!empty($orderby) && !empty($order))? $query->orderBy('recharge.'.$orderby, $order): $query->orderBy("recharge.id", "desc");
-            $query->where(function ($q) use ($search) {
-                if (!empty($search)) {
-                    $q->orWhere('recharge.canumber', 'LIKE', "%{$search}%");
-                    $q->orWhere('recharge.status', 'LIKE', "%{$search}%"); 
-                    $q->orWhere('recharge.reqid', 'LIKE', "%{$search}%");
-                   $q->orWhere('recharge.txnid', 'LIKE', "%{$search}%"); 
-                }
-                return $q;
-            });
+                $query->where(function ($q) use ($search) {
+                    if (!empty($search)) {
+                        $q->orWhere('recharge.canumber', 'LIKE', "%{$search}%");
+                        $q->orWhere('recharge.status', 'LIKE', "%{$search}%"); 
+                        $q->orWhere('recharge.reqid', 'LIKE', "%{$search}%");
+                        $q->orWhere('recharge.txnid', 'LIKE', "%{$search}%"); 
+                    }
+                    return $q;
+                });
             
-            if($request->user()->user_type == 5){
+            
+                if($request->user()->role == 5){
                 $userid =  $request->user()->id;
                 $query->where('recharge.userid',$userid);
             }

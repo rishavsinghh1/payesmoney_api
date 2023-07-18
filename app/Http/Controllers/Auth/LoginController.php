@@ -387,6 +387,8 @@ class LoginController extends Controller
         $getOtp = Otp::select("*")->where('name', $req['email'])->where('otptype', 'login')->orderBy('created_at', 'desc')->first();
         return $getOtp;
     } 
+
+    
     public function logout()
     {
         try {

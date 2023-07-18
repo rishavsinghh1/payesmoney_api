@@ -148,10 +148,11 @@ $router->get('/', function () use ($router) {
 
         $router->group(['prefix' => 'recharge'], function () use ($router) { 
             $router->post('dorecharge', 'Recharge\Prepaidrecharge@dorecharge');
-            $router->post('rechargehistory', 'Reports\PayoutController@record');
-            
+            $router->post('rechargehistory', 'Reports\PayoutController@record'); 
             $router->post('getoperator', 'Recharge\Prepaidrecharge@getoperator'); 
-            $router->post('getRoffer', 'Recharge\Prepaidrecharge@getRoffer');  
+            $router->post('getRoffer', 'Recharge\Prepaidrecharge@getRoffer');
+            $router->post('getDthDetails', 'Recharge\Prepaidrecharge@getDthDetails'); 
+             
             
         });
         $router->post('get-user', ['as' => 'user-edit', 'uses' => 'User\UserController@getUser']);

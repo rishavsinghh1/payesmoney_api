@@ -131,7 +131,7 @@ class Rechargelib{
          self::writelog("REQUEST".$num,$request,$request['apiname']); 
          $curl = curl_init();
          curl_setopt_array($curl, [
-           CURLOPT_URL => 'https://api.bestapi.in/api/v1/RofferCheck',
+           CURLOPT_URL => 'https://api.bestapi.in/api/v1/'.$request['url'],
            CURLOPT_RETURNTRANSFER => true,
            CURLOPT_ENCODING => "",
            CURLOPT_MAXREDIRS => 10,
@@ -161,7 +161,7 @@ class Rechargelib{
         $data = [
             'method' => $request['method'],
             'apiname'=> $request['apiname'],
-            'url'    => static::$liveurl.'RofferCheck', 
+            'url'    => 'RofferCheck', 
             'parameter' => [ 
                     'mobileno'   => $request['canumber'],
                     'opcode'     => $request['operator']           
@@ -170,7 +170,19 @@ class Rechargelib{
         
        return self::hittingdocheckRoffer($data);
     }
-
+    public static function docDthOffer($request){ 
+        $data = [
+            'method' => $request['method'],
+            'apiname'=> $request['apiname'],
+            'url'    => 'getDthInfo', 
+            'parameter' => [ 
+                    'mobileno'   => $request['canumber'],
+                    'opcode'     => $request['operator']           
+            ]
+        ];
+        
+       return self::hittingdocheckRoffer($data);
+    }
     
     
 }
