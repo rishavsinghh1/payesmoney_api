@@ -14,7 +14,7 @@
 $router->get('/', function () use ($router) {
     return $router->app->version();
 });
-
+$router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge');
 // $router->group(['middleware' => 'checkip'], function () use ($router) { 
     //auth routes
     $router->group(['prefix' => 'auth'], function () use ($router) {
@@ -152,7 +152,9 @@ $router->get('/', function () use ($router) {
             $router->post('rechargehistory', 'Reports\PayoutController@record'); 
             $router->post('getoperator', 'Recharge\Prepaidrecharge@getoperator'); 
             $router->post('getRoffer', 'Recharge\Prepaidrecharge@getRoffer');
-            $router->post('getDthDetails', 'Recharge\Prepaidrecharge@getDthDetails'); 
+            $router->post('getDthDetails', 'Recharge\Prepaidrecharge@getDthDetails');
+           
+            
              
             
         });
