@@ -7,6 +7,7 @@ class Rechargelib{
     public static $liveurl = "https://api.bestapi.in/api/v1/";
    
     public static $authkey = "MGM4MDQ0ZmQ1NDRlY2ZjOTc2OWZiZWNlYjI4NGZhYWE="; 
+    public static $authkeylocal = "ZDI1M2Q5NGIwMDBmNTdiZDJiODNjM2FlNGE1NTc0NWE="; 
     public static $required = array('error_code','errorMessage');
 
     public static function writelog($type,$req,$dirname){
@@ -69,6 +70,21 @@ class Rechargelib{
             'method' => $request['method'],
             'apiname'=> $request['apiname'],
             'url'    => static::$liveurl.'recharge',
+
+            'parameter' => [ 
+                    'mobileno'   => $request['canumber'],
+                    'amount'     => $request['amount'],
+                    'operator'   => $request['operator'],
+                    'reqId'      => $request['referenceid']            
+            ]
+        ];
+       return self::hitting($data);
+    }
+    public static function doDthrecharge($request){ 
+        $data = [
+            'method' => $request['method'],
+            'apiname'=> $request['apiname'],
+            'url'    => static::$liveurl.'dthrecharge',
 
             'parameter' => [ 
                     'mobileno'   => $request['canumber'],
