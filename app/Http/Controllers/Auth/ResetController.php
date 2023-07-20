@@ -130,7 +130,7 @@ class ResetController extends Controller
             if (is_numeric($request->email)) {
                 $credentials['phone'] = $request->email;
             } else {
-                $credentials['email'] = trim($request->email);
+                $credentials['username'] = trim($request->email);
             }
 
             $Otp = $request->otp;
