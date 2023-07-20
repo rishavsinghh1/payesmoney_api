@@ -246,7 +246,7 @@ class LoginController extends Controller
 
             $verifiedUser = array();
             $isValidEmail = User::where('status', 1)->when($logintype == "email", function ($query) use ($request) {
-                $query->where('email', $request->email);
+                $query->where('username', $request->email);
             })->when($logintype == "phone", function ($query) use ($request) {
                 $query->where('phone', $request->email);
             })->first();
