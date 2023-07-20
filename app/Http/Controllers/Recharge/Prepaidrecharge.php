@@ -74,7 +74,7 @@ class Prepaidrecharge extends Controller
                                     'operator'      =>  $operator->op_id,
                                     'canumber'      =>  $ins_array['canumber'],
                                     'amount'        =>  $ins_array['amount'],
-                                    'referenceid'   =>  $request->referenceid.$requestdata['orderid'],
+                                    'referenceid'   =>  $request->referenceid,
                                     'apiname'       => 'Recharge',
                                     'method'        => 'POST'
                                 );
