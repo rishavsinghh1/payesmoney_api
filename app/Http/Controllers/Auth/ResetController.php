@@ -74,7 +74,7 @@ class ResetController extends Controller
                 $user->save();
                 return $this->response('success', ['message' => 'Password updated successfully']);
             } else {
-                return $this->response('updateError', ['message' => 'Password not updated']);
+                return $this->response('updateError', ['message' => 'Current Password Not Matched!!']);
             }
         } catch (\Throwable $th) {
             return $this->response('internalservererror', ['message' => $th->getMessage()]);

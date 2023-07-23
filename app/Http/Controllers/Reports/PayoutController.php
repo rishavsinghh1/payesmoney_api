@@ -84,7 +84,7 @@ class PayoutController extends Controller
         $statename     = trim(strip_tags($request->statename));
         $operator     = trim(strip_tags($request->operator)); 
         if(empty($startdate) && empty($enddate)){
-            $startdate = $this->today;
+            $startdate = date('Y-m-d', strtotime("-30 days"));
             $enddate   = $this->today;  
         } 
         if(!empty($startdate) && !empty($enddate)){ 
