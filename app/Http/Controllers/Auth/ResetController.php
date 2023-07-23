@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use App\Models\Userloginlog;
-
+use App\Models\Permission;
 class ResetController extends Controller
 {
     use CommonTrait;
@@ -137,8 +137,10 @@ class ResetController extends Controller
             // echo($Otp);
             $geneOtp = Otp::select('id', 'name', 'otp', 'status', 'created_at')->where('name', $request->email)->orderBy('created_at', 'desc')->first();
             // echo($geneOtp->otp);die;
-            $userdetails = User::select('id')->where($credentials)->first();
+            $userdetails = User::select('*')->where($credentials)->first();
+            
             $token = Auth::login($userdetails);
+            
             if (!empty($geneOtp)) {
                 if ($geneOtp->otp == $Otp) {
                     if($geneOtp->status == 1){
@@ -160,6 +162,7 @@ class ResetController extends Controller
                         $location = $request->lat . "," . $request->lng;
                         Userloginlog::create(["userid" => Auth::user()->id, "ipaddress" => $request->ip(), 'latlng' => $location, 'device_name' => $request->server('HTTP_USER_AGENT')]);
                         $result = Auth::user();
+                       
                         $return['name']                 =   $result->fullname;
                         $return['userid']               =   $result->id;
                         $return['email']          	    =   $result->email;
@@ -233,12 +236,13 @@ class ResetController extends Controller
     /***********************Forgot Password****************************************/
     public function forgotPassword(Request $request)
     {
+         
         try {
             $validatorArray = [
                 'email' => 'required',
                 'otp' => 'required',
                 'password' => ['required', 'confirmed', Password::min(8), 'regex:/^(?=.*[a-z]){2,}(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/'],
-                'password' => ['required', 'confirmed', Password::min(8), 'regex:/^(?=.*[a-z]){2,}(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/'],
+                'confpassword' => ['required', 'confirmed', Password::min(8), 'regex:/^(?=.*[a-z]){2,}(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/'],
                 'password.regex' => 'Password must be of 8 characters Atleast 1 alphabets must be in upper case Atleast 1 letters must be in lower case Must be atleast 1 numeric.'
             ];
             $messagesArray = [

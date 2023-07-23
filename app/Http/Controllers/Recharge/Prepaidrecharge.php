@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Http\Controllers\Recharge; 
 use App\Http\Controllers\Controller;
 use App\Http\Traits\CommonTrait;
@@ -17,11 +16,9 @@ use Illuminate\Support\Facades\Auth;
 class Prepaidrecharge extends Controller
 {
     use CommonTrait,HeaderTrait,ChargesTrait,RechargeTrait;
-    public function __construct()
-    {
+    public function __construct(){
         $this->status = ['0'=>'Deactive','1'=>'Active'];
-    }
-    
+    } 
     public function dorecharge(Request $request)
     {
         try {
@@ -203,8 +200,7 @@ class Prepaidrecharge extends Controller
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
     
-    } 
-
+    }  
     public function getoperator(Request $request){
         try {
             $userdata = Auth::user();
@@ -243,8 +239,7 @@ class Prepaidrecharge extends Controller
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
         
-    }
-
+    } 
     public function getRoffer(Request $request){
         try {
             $userdata = Auth::user();
@@ -324,62 +319,67 @@ class Prepaidrecharge extends Controller
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
         
-    }
-
+    } 
     public function callbackrecharge(Request $request){
         $payload = $_REQUEST; 
         $num    =   time();
         if(isset($payload['api_ref_id'])){ $orderid = $payload['api_ref_id']; } ; 
-      // dd($payload);
         $info   = Recharge::select('*')   
         ->where('refid',$orderid) 
         ->first(); 
-        if($info->refunded == 0){
-            if ($payload['status'] == 1) {
-                $txnupdate = [
-                    'operatorid' => $payload['operator_id'],
-                    'ackno' => $payload['txn_id'],
-                    'status' => 1, 
-                ];
-                $isupdate = Recharge::where('txnid', $info->txnid)->update($txnupdate);
-                $response = [
-                    'message' => "YES"
-                ];
-                return $this->response('success', $response);
-            }else if ($payload['status'] == 3) {
-                $post1['ttype'] = 0;
-                $post1['utype'] = 'credit';
-                $post1['comm']  = 0;
-                $post1['dcomm']  = 0;
-                $post1['sdcomm'] =0;
-                $post1['profit'] = 0;
-                $post1['uid'] = $info->userid;
-                $post1['amount'] = $info->amount - $info->comm;
-                $post1['narration'] = "Transaction FAILED for A/C ".$info->canumber." amount of ".$info->amount; 
-                $post1['creditamount'] =$info->amount - $info->comm;
-                $rechcredit = RechargeTrait::credit($post1);
-                $txnupdate = [
-                    'refundtxnid' => $rechcredit['txnno'],
-                    'refunded' => 1,
-                    'status' => 3, 
-                    'daterefunded' => date('Y-m-d'),
-                ];
-                $isupdate = Recharge::where('id', $info->id)->update($txnupdate); 
-                $response = [
-                    'message' => "YES"
-                ];
-                return $this->response('success', $response);
+        if($info){ 
+            if($info->refunded == 0){
+                if ($payload['status'] == 1) {
+                    $txnupdate = [
+                        'operatorid' => $payload['operator_id'],
+                        'ackno' => $payload['txn_id'],
+                        'status' => 1, 
+                    ];
+                    $isupdate = Recharge::where('txnid', $info->txnid)->update($txnupdate);
+                    $response = [
+                        'message' => "YES"
+                    ];
+                    return $this->response('success', $response);
+                }else if ($payload['status'] == 3) {
+                    $post1['ttype'] = 0;
+                    $post1['utype'] = 'credit';
+                    $post1['comm']  = 0;
+                    $post1['dcomm']  = 0;
+                    $post1['sdcomm'] =0;
+                    $post1['profit'] = 0;
+                    $post1['uid'] = $info->userid;
+                    $post1['amount'] = $info->amount - $info->comm;
+                    $post1['narration'] = "Transaction FAILED for A/C ".$info->canumber." amount of ".$info->amount; 
+                    $post1['creditamount'] =$info->amount - $info->comm;
+                    $rechcredit = RechargeTrait::credit($post1);
+                    $txnupdate = [
+                        'refundtxnid' => $rechcredit['txnno'],
+                        'refunded' => 1,
+                        'status' => 3, 
+                        'daterefunded' => date('Y-m-d'),
+                    ];
+                    $isupdate = Recharge::where('id', $info->id)->update($txnupdate); 
+                    $response = [
+                        'message' => "YES"
+                    ];
+                    return $this->response('success', $response);
+                }else{
+                    $response = [
+                        'message' => "NO"
+                    ];
+                    return $this->response('success', $response);
+                }
             }else{
                 $response = [
-                    'message' => "NO"
+                    'message' => "ALREADY"
                 ];
                 return $this->response('success', $response);
             }
         }else{
             $response = [
-                'message' => "ALREADY"
+                'message' => "NOT FOUND"
             ];
             return $this->response('success', $response);
-        } 
+        }
     }
 }

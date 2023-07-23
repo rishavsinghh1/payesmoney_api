@@ -18,7 +18,8 @@ use App\Models\AdminMenuPermission;
 use App\Models\UserPasswordDetails as UserPassword;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-
+use App\Libraries\Common\Sms;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Hash;
 
 
@@ -96,15 +97,18 @@ class LoginController extends Controller
                 } else {
                     $validlogin = true;
                 }
-
+               
                 if ($validlogin) {
                      if (Auth::user()->firstlogin == 1) {
-                        $this->sendverificationotp(["name" => $request->email, "isSend" => 1, 'otptype' => 'login']);
+                      
+                        $this->sendverificationotp(["name" => $request->email,"email"=>Auth::user()->email,"phone"=>Auth::user()->phone, "isSend" => 1, 'otptype' => 'login']);
                         $response = $this->passwordError('otpsent');
                         if ($logintype == "email") {
-                            $response['data']['email'] = substr_replace($request->email, "XXXXXX", 0, 6);
+                            $response['data']['email'] = substr_replace(Auth::user()->email, "XXXXXX", 0, 6);
+                            $response['data']['mobile'] = substr_replace(Auth::user()->phone, "XXXXXX", 0, 6);
                         } else {
-                            $response['data']['phone'] = substr_replace($request->email, "XXXXXX", 0, 6);
+                            $response['data']['phone'] = substr_replace(Auth::user()->phone, "XXXXXX", 0, 6);
+                            $response['data']['mobile'] = substr_replace(Auth::user()->phone, "XXXXXX", 0, 6);
                         }
                         return $this->response('success', $response);
                     } else {
@@ -126,12 +130,14 @@ class LoginController extends Controller
                         }
 
                         if ($allwoTwostep) {
-                            $this->sendverificationotp(["name" => $request->email, "isSend" => 1, 'otptype' => 'login']);
+                            $this->sendverificationotp(["name" => $request->email,"email"=>Auth::user()->email,"phone"=>Auth::user()->phone, "isSend" => 1, 'otptype' => 'login']);
                             $response = $this->passwordError('otpsent');
                             if ($logintype == "email") {
-                                $response['data']['email'] = substr_replace($request->email, "XXXXXX", 0, 6);
+                                $response['data']['email'] = substr_replace(Auth::user()->email, "XXXXXX", 0, 6);
+                                $response['data']['mobile'] = substr_replace(Auth::user()->phone, "XXXXXX", 0, 6);
                             } else {
-                                $response['data']['phone'] = substr_replace($request->email, "XXXXXX", 0, 6);
+                                $response['data']['phone'] = substr_replace(Auth::user()->phone, "XXXXXX", 0, 6);
+                                $response['data']['mobile'] = substr_replace(Auth::user()->phone, "XXXXXX", 0, 6);
                             }
                             return $this->response('success', $response);
                         } else {
@@ -213,8 +219,21 @@ class LoginController extends Controller
     } 
     protected function sendverificationotp($req)
     {
-        $otp = 1234;
-        Otp::create(['name' => $req['name'], 'status' => 1, 'otptype' => $req['otptype'], 'otp' => $otp]);
+        $environment = App::environment();
+        if($environment != 'local'){
+            $otp = rand(0000,9999);
+            Sms::sendMSG91sms(array("template"=>"otp","message"=>array(
+                "mobiles"=>"91".$req['phone'],
+                "otp"=> $otp 
+         )));
+         Otp::create(['name' => $req['name'], 'status' => 1, 'otptype' => $req['otptype'], 'otp' => $otp]);
+        }else{
+            $otp = 1234;
+       
+            Otp::create(['name' => $req['name'], 'status' => 1, 'otptype' => $req['otptype'], 'otp' => $otp]);
+        }
+      
+       
         return true;
     } 
     public function verifyOtp(Request $request)
@@ -294,6 +313,7 @@ class LoginController extends Controller
 
             $agent = $request->server('HTTP_USER_AGENT');
             $getOtp = $this->validateOtp(["ipaddress" => $request->ip(), 'latlng' => $location, "otp" => $request->otp, "device_name" => $agent, 'userid' => Auth::user()->id, 'email' => $request->email]);
+          
             if ($getOtp) {
                 $otpstatus = $getOtp->status;
                 if ($getOtp->otp == $otp && $otpstatus == 1) {
@@ -308,6 +328,7 @@ class LoginController extends Controller
                         Otp::where('id', $getOtp->id)->update(['status' => 0]);
                         User::where('id', Auth::user()->id)->update(['remember_token' => base64_encode($request->ip()), 'firstlogin' => 0]);
                         $result = Auth::user();
+                       
                         $return['name']                 =   $result->fullname;
                         $return['userid']               =   $result->id;
                         $return['email']          	    =   $result->email;
