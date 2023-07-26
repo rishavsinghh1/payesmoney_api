@@ -13,7 +13,9 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Creditrequest;
 use App\Models\CompanyBank;
 use App\Models\CashTransaction;
-use App\Models\UserPasswordDetails as UserPassword;
+use Carbon\Carbon;
+use App\Models\UserPasswordDetails as UserPassword; 
+use App\Libraries\Fund; 
 class FundingController extends Controller
 {
     
@@ -22,6 +24,7 @@ class FundingController extends Controller
         $this->status = ['0' => "Pending", '1' => "Active", '2' => "Deactive"];
         $this->requesttypes = [0 => 'Cash Deposit', 1 => 'NEFT', 2 => 'RTGS/IMPS', 3 => 'Bank Transfer', 4 => 'other', 5 => 'funding'];
         $this->requeststatus = ['Rejected', 'Approved', 'Pending', 'Authorization Pending', 'Hold'];
+        $this->today      = Carbon::now()->toDateString();
     }
 
     public function create(Request $request){
@@ -358,6 +361,8 @@ class FundingController extends Controller
                          return $this->response('validatorerrors', $message);
                      } 
                     $cr = $this->getFundById($request->id); 
+                    $req = Fund::getrequest($request->id);  
+                    if($req){
                     $remarks = $cr->referencenumber . "-" . $cr->requestremark. '-' .$request->remarks;
                     if (!empty($cr) && $cr->status == 2 && $request->status == "approved") { 
                         $requestdata = array(
@@ -370,29 +375,45 @@ class FundingController extends Controller
                             "ttype" => 0,
                             "processby" => $userdata->id
                         );
+
+                        if ($req['debitor']['cd_balance'] >= $req['request']['amount']) {
+
+                        
                          $response = $this->approverequest($requestdata); 
                         if ($response['status']) {
                             $response = [
+
+                                'responsecode' =>true,
                                 'message' => "Fund request is " . $request->status . " successfully"
                             ];
                             return $this->response('success', $response); 
                         } else {
                             $response = [
+                                'responsecode' =>false,
                                 'errors' => "invalid!",
                                 'message' => $response['message']
                             ];
                             return $this->response('notvalid', $response);  
                         }
+                    }else{
+                        $response = [
+                            'responsecode' =>false,
+                            'message' => "Insufficient fund in debitor account " . $req['debitor']['username'] . " Balance " . $req['debitor']['cd_balance']
+                        ];
+                        return $this->response('success', $response); 
+                    }
                     }elseif ($request->status== "rejected") {
                         $requestdata = array("requestremark" => $remarks, "acomment" => $request->remarks, "debitor" =>self::GetuserId('ADMIN'), 'status' => 0);
                         $reject = $this->rejectrequest($requestdata , $cr->id);
                         if ($reject) {
                             $response = [
+                                'responsecode' =>true,
                                 'message' => "Fund request is " . $request->status . " successfully"
                             ];
                             return $this->response('success', $response); 
                         } else {
                             $response = [
+                                'responsecode' =>false,
                                 'errors' => "invalid!",
                                 'message' => $response['message']
                             ];
@@ -400,11 +421,21 @@ class FundingController extends Controller
                         }
                     }else {
                         $response = [
+                            'responsecode' =>false,
                             'errors' => "invalid!",
                             'message' => "unable to find this request"
                         ];
                         return $this->response('notvalid', $response);  
                     } 
+                }else{
+                    $response = [
+                        'responsecode' =>false,
+                        'errors' => "invalid!",
+                        'message' => 'Some Error Occured'
+                    ];
+                    return $this->response('notvalid', $response);  
+                }
+
                  } catch (\Throwable $th) {
                      return $this->response('internalservererror', ['message' => $th->getMessage()]);
                  } 
@@ -469,5 +500,166 @@ class FundingController extends Controller
          return $this->response('notvalid', $response);  
         }
     }
+    public function getpendingFund(Request $request){
+        $userdata = Auth::user();   
+        if ($userdata) {
+             if ($userdata && in_array($userdata->role, array(1,2))) { 
+                try{   
+                        $startdate     = trim(strip_tags($request->startdate));
+                        $enddate       = trim(strip_tags($request->enddate)); 
+                        $status        = trim(strip_tags($request->status));
+                        $userid        = trim(strip_tags($request->userid));
+                        $start         = trim(strip_tags($request->start));
+                        $length        = trim(strip_tags($request->length));
+                        $order         = trim(strip_tags($request->order)); 
+                        $search        = trim(strip_tags($request->search));  
+                        $searchby      = trim(strip_tags($request->searchby));
+                        $searchvalue   = trim(strip_tags($request->searchvalue));
+                        if(empty($startdate) && empty($enddate)){
+                            $startdate = $this->today;
+                            $enddate   = $this->today;  
+                        }
+        
+                    $order = 'DESC';
+                    $query = DB::table('creditrequest');
+                    $query->leftjoin('users', 'users.id', '=', 'creditrequest.userid');  
+                    $query->leftjoin('companybank as tb2', 'tb2.id', '=', 'creditrequest.bankid');
+                    $query->select('tb2.name',
+                            'users.username', 
+                            'users.phone', 
+                            'creditrequest.id as reqid',
+                            'users.cd_balance as current_balance',
+                            'creditrequest.amount',
+                            'creditrequest.depositeddate',
+                            'creditrequest.requesttype',
+                            'creditrequest.referencenumber',
+                            'creditrequest.requestremark',
+                            'creditrequest.image',
+                            'creditrequest.created_at',
+                            'creditrequest.status');
+                
+                    
+                    
+                        $query->where(function ($q) use ($startdate, $enddate) {
+                            if (!empty($startdate) && !empty($enddate)) {
+                                $q->whereRaw("date(tbl_creditrequest.created_at) between '{$startdate}' and '{$enddate}'"); 
+                            }
+                            return $q;
+                        }); 
 
+                     $query->where('users.role',5);
+                    if ($status != "" ) {
+                        $query->where('creditrequest.status',$status);
+                    }
+                    if ($userid != "") {
+                    $query->where('creditrequest.userid',$userid);
+                    } 
+                    if ($searchby  != "" && $searchvalue != "") {
+                        if ($searchby == 'referencenumber') { 
+                            $query->where('creditrequest.referencenumber', $searchvalue);
+                        } else if ($searchby == 'amount') { 
+                            $query->where('creditrequest.amount', $searchvalue);
+                        } 
+                        if ($searchby == 'username') {
+                            $query->where('users.username', $searchvalue);
+                        } 
+                    } elseif ($searchvalue != "") {
+                        $query->where(function ($query) use ($searchvalue) {
+                            $query->where('creditrequest.reqid', 'like',  trim($searchvalue) . '%') 
+                                ->orwhere('creditrequest.referencenumber', 'like',  trim($searchvalue) . '%')  
+                                ->orwhere('creditrequest.username', 'like', trim($searchvalue) . '%');
+                        });
+                    }
+                    
+                    $totaldata = $query->get()->toArray();
+                   
+                    $recordsTotal = $query->count();
+                    
+                    if($order != ""){
+                        $query->orderBy('creditrequest.id', $order);
+                    }
+                    if ($length != "" && $start !="") {
+                        $data = $query->skip($start)->take($length)->get()->toArray();
+                        $recordsFiltered = count($data);
+                    }else{
+                        $data = $query->get()->toArray();
+                        $recordsFiltered = $query->count();
+                    } 
+                    $head           = HeaderTrait::txn_adminfund_header();
+                   if(!empty($data)){
+                       
+                    $response = [
+                        'message' => "Data Found",
+                        'data'              => $data,
+                          'header'            => $head,
+                        'recordsFiltered'   => $recordsTotal,
+                        'recordsTotal'      => $recordsFiltered,
+                    ];
+                    return $this->response('success', $response);
+                        
+                    }else{
+                        $response = [
+                            'errors' => "invalid!",
+                            'message' => "No data Found!"
+                        ];
+                        return $this->response('notvalid', $response); 
+                    }
+                } catch (\Throwable $th) {
+                    return $this->response('internalservererror', ['message' => $th->getMessage()]); 
+                }
+            }else { 
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "You are not allowed to approve this fund request"
+                ];
+                return $this->response('notvalid', $response); 
+            } 
+        }else{
+            $response = [
+                'errors' => "invalid!",
+                'message' => "Some Error Occure !! Re-login"
+            ];
+            return $this->response('notvalid', $response);  
+        }
+    }
+
+    public function getpendingById(Request $request){
+        try {  
+            $validated = Validator::make($request->all(), [ 
+                'reqid' => 'required',
+            ]);
+
+            if ($validated->fails()) {
+                $message   = $this->validationResponse($validated->errors());
+                return $this->response('validatorerrors', $message);
+            }
+            $userdata = Auth::user();  
+            if($userdata){
+                $reqid =  $request->reqid;
+                $info = Fund::getrequest($reqid);  
+                    if($info){
+                        $response = [
+                            'message' => "All Pending Request!",
+                            'data'              => $info, 
+                        ];
+                        return $this->response('success', $response); 
+                    }else{
+                        $response = [
+                            'errors' => "invalid!",
+                            'message' => "No data Found!"
+                        ];
+                        return $this->response('notvalid', $response);  
+                    }
+            }else{
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "You are not Authorised!"
+                ];
+                return $this->response('notvalid', $response);  
+            }     
+                
+             } catch (\Throwable $th) {
+                return $this->response('internalservererror', ['message' => $th->getMessage()]); 
+        } 
+    }
 }

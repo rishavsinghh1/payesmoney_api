@@ -67,6 +67,11 @@ trait CommonTrait
                 'status' => false,
                 'message' => 'HTTP INTERNAL SERVER ERROR!',
             ),
+            'somerror' => array(
+                'statuscode' => 200,
+                'status' => false,
+                'message' => 'Some Error!!',
+            ),
         );
 
         if (isset($statusResp[$input])) {

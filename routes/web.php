@@ -179,7 +179,10 @@ $router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge')
             $router->post('addfundsuperadmin', 'funding\FundingController@addfundsuperadmin');  
             $router->post('transferfund', 'funding\FundingController@transferfund');  
             $router->post('approve', 'funding\FundingController@approve');  
-            $router->post('getFundingRequestDetail', 'funding\FundingController@getFundingRequestDetail');
+            $router->post('getFundingRequestDetail', 'funding\FundingController@getFundingRequestDetail'); 
+            $router->post('getlistfund','funding\FundingController@getpendingFund');
+            $router->post('getpendingById','funding\FundingController@getpendingById');
+            
             
         });
         $router->group(['prefix' => 'commission'], function () use ($router) {

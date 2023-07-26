@@ -409,7 +409,6 @@ class LoginController extends Controller
         return $getOtp;
     } 
 
-    
     public function logout()
     {
         try {
@@ -591,38 +590,30 @@ class LoginController extends Controller
             ];
         }else{
             $menuPermissions = AdminMenuPermission::where('user_id', Auth::user()->id)->where('status', 1)->pluck('menu_id');
-            if(Auth::user()->role == 1){
-                $group_menu = AdminMenu::whereIn('module_id', $modules)->where('parent', 0)->where('is_show', 1)->orderBy('menu_order', 'ASC')->get()->toArray();
-            }else{
-                $group_menu = AdminMenu::whereIn('id', $menuPermissions)->whereIn('module_id', $modules)->where('parent', 0)->where('is_show', 1)->orderBy('menu_order', 'ASC')->get()->toArray();
-            }
-            
+       
+            $group_menu = AdminMenu::whereIn('id', $menuPermissions)->whereIn('module_id', $modules)->where('parent', 0)->orderBy('menu_order', 'ASC')->get()->toArray();
             $menufinal = array();
             if (!empty($group_menu)) {
                 
                 foreach ($group_menu as $gm) {
 
-                    if ($gm['type'] == "item") {
+                    if ($gm['type'] == "link") {
                         $item = [
                             'id' => $gm['menu'],
                             'title' => $gm['name'],
                             'type' => $gm['type'],
                             'icon' => $gm['icon'],
-                            'url' => $gm['urlapi']
+                            'path' => $gm['urlapi']
                         ];
-                    } elseif ($gm['type'] == "collapse") {
+                    } elseif ($gm['type'] == "sub") {
                         $item = [
                             'id' => $gm['menu'],
                             'title' => $gm['name'],
                             'type' => $gm['type'],
+                            "active"=>false,
                             'icon' => $gm['icon'],
-                        ];
-                        if(Auth::user()->role == 1){
-                            $sub_menu = AdminMenu::whereIn('module_id', $modules)->where('is_show', 1)->where('parent', $gm['id'])->orderBy('menu_order', 'ASC')->get()->toArray();
-                        }else{
-                            $sub_menu = AdminMenu::whereIn('id', $menuPermissions)->whereIn('module_id', $modules)->where('is_show', 1)->where('parent', $gm['id'])->orderBy('menu_order', 'ASC')->get()->toArray();
-                        }
-                        
+                        ]; 
+                        $sub_menu = AdminMenu::whereIn('id', $menuPermissions)->whereIn('module_id', $modules)->where('parent', $gm['id'])->orderBy('id', 'ASC')->get()->toArray();
                         $item['children'] = array();
                         foreach ($sub_menu as $sm) {
                             $submenuchild = [
@@ -630,7 +621,7 @@ class LoginController extends Controller
                                 'title' => $sm['name'],
                                 'type' => $sm['type'],
                                 'icon' => $sm['icon'],
-                                'url' => $sm['urlapi']
+                                'path' => $sm['urlapi']
                             ];
                             array_push($item['children'], $submenuchild);
                         }
@@ -641,13 +632,8 @@ class LoginController extends Controller
                             'type' => $gm['type'],
                             'icon' => $gm['icon'],
                         ];
-                        $item['children'] = array();
-                        if(Auth::user()->role == 1){
-                            $parent_menu = AdminMenu::whereIn('module_id', $modules)->where('is_show', 1)->where('parent', $gm['id'])->orderBy('menu_order', 'ASC')->get()->toArray();
-                        }else{
-                            $parent_menu = AdminMenu::whereIn('id', $menuPermissions)->whereIn('module_id', $modules)->where('is_show', 1)->where('parent', $gm['id'])->orderBy('menu_order', 'ASC')->get()->toArray();
-                        }
-                        
+                        $item['children'] = array(); 
+                        $parent_menu = AdminMenu::whereIn('id', $menuPermissions)->whereIn('module_id', $modules)->where('parent', $gm['id'])->orderBy('menu_order', 'ASC')->get()->toArray();
                         foreach ($parent_menu as $pm) {
                             if($pm['type'] == "item"){
                                 $children = [
@@ -655,14 +641,10 @@ class LoginController extends Controller
                                     'title' => $pm['name'],
                                     'type' => $pm['type'],
                                     'icon' => $pm['icon'],
-                                    'url' => $pm['urlapi']
+                                    'path' => $pm['urlapi']
                                 ];
-                            }else{
-                                if(Auth::user()->role == 1){
-                                    $sub_menu = AdminMenu::whereIn('module_id', $modules)->where('is_show', 1)->where('parent', $pm['id'])->orderBy('menu_order', 'ASC')->get()->toArray();
-                                }else{
-                                    $sub_menu = AdminMenu::whereIn('id', $menuPermissions)->whereIn('module_id', $modules)->where('is_show', 1)->where('parent', $pm['id'])->orderBy('menu_order', 'ASC')->get()->toArray();
-                                }
+                            }else{ 
+                                $sub_menu = AdminMenu::whereIn('id', $menuPermissions)->whereIn('module_id', $modules)->where('parent', $pm['id'])->orderBy('menu_order', 'ASC')->get()->toArray();
                                 
                                 $children = [
                                     'id' => $pm['menu'],
@@ -677,7 +659,7 @@ class LoginController extends Controller
                                         'title' => $sm['name'],
                                         'type' => $sm['type'],
                                         'icon' => $sm['icon'],
-                                        'url' => $sm['urlapi']
+                                        'path' => $sm['urlapi']
                                     ];
                                     array_push($children['children'], $submenuchild);
                                 }
@@ -880,5 +862,5 @@ class LoginController extends Controller
         } 
     }
 
-
+  
 }

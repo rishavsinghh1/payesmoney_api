@@ -227,4 +227,19 @@ trait HeaderTrait
         $result[] = ['name' => 'status', 'value' => 'Status', 'is_show' => 1, 'issort' => 0];
         return $result;
     }
+
+    static function txn_adminfund_header(){
+        $isshow =1; 
+        $result[] = ['name'=>'reqid','value'=>'REQ. ID','is_show'=>$isshow,'issort'=>0];
+        $result[] = ['name'=>'name','value'=>'Bank Name','is_show'=>$isshow,'issort'=>0];
+        $result[] = ['name'=>'username','value'=>'USERNAME','is_show'=>$isshow,'issort'=>0]; 
+        $result[] = ['name'=>'current_balance','value'=>'CURRENT BALANCE','is_show'=>$isshow,'issort'=>0];
+        $result[] = ['name'=>'amount','value'=>'REQ AMOUNT','is_show'=>$isshow,'issort'=>0];
+        $result[] = ['name'=>'depositeddate','value'=>'DEPOSITE DATE','is_show'=>$isshow,'issort'=>0]; 
+        $result[] = ['name'=>'referencenumber','value'=>'REF NO.','is_show'=>$isshow,'issort'=>0]; 
+        $result[] = ['name'=>'status','value'=>'STATUS','is_show'=>$isshow,'issort'=>0]; 
+        $result[] = ['name'=>'phone','value'=>'PHONE NO.','is_show'=>$isshow,'issort'=>0]; 
+        $result[] = ['name'=>'requestremark','value'=>'REMARKS','is_show'=>$isshow,'issort'=>0]; 
+        return $result;
+    }
 }
