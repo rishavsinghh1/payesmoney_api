@@ -32,18 +32,15 @@ trait ChargesTrait
             } else {
                 if ($operator == 33 || $operator == 34) {
                     $rcomm = 0;
-                    $dcomm = 0;
-                    $pcomm = 0;
+                    $dcomm = 0; 
                     $sdcomm = 0;
                 } elseif ($operator == 11) {
                     $rcomm = $amount * (1 / 100);
-                    $dcomm = $amount * (0.2 / 100);
-                    $pcomm = 0;
+                    $dcomm = $amount * (0.2 / 100); 
                     $sdcomm = $amount * (0.2 / 100);
                 } else {
                     $rcomm = $amount * (1.5 / 100);
-                    $dcomm = $amount * (0.2 / 100);
-                    $pcomm = 0;
+                    $dcomm = $amount * (0.2 / 100); 
                     $sdcomm = $amount * (0.2 / 100);
                 }
             }

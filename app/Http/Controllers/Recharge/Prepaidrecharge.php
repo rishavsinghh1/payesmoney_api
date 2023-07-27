@@ -5,6 +5,7 @@ use App\Http\Traits\CommonTrait;
 use App\Models\Rechargeoperator;
 use App\Models\Recharge;
 use App\Models\UniqueRef;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
@@ -26,11 +27,11 @@ class Prepaidrecharge extends Controller
                 "operator"     => 'required|max:4|min:2',
                 "mobile"      => 'required|digits:10|numeric',
                 "amount"    => 'required||numeric|gt:0',
-                "referenceid"    => 'required', 
-                 
+                "referenceid"    => 'required',   
             ]);
             $userdata = Auth::user();
-            if ($userdata && in_array($userdata->role, array(1,5))) {
+        //    dd($userdata);
+            if ($userdata && in_array($userdata->role, array(5))) {
                 if ($validated->fails()) {
                     $message   = $this->validationResponse($validated->errors());
                     return $this->response('validatorerrors', $message);
@@ -62,7 +63,7 @@ class Prepaidrecharge extends Controller
                      $ins_array['sdcomm']    = $charges['sdcomm']; 
                      if($userdata->cd_balance>=$amount) {
                         $requestdata =  RechargeTrait::process($ins_array);
-                        
+                       
                         if($requestdata['status']==1 && $requestdata['txnno']!=""){ 
                             $update_request = Recharge::where("id", $requestdata['orderid'])
                             ->update(["status" => 3]);  
@@ -109,6 +110,13 @@ class Prepaidrecharge extends Controller
                                 ];
                                 return $this->response('success', $response);
                                }else if($rs['statuscode']==2){
+                                $creditCommSD =  User::find($userdata['supdistributor']); 
+                                $creditCommDIST =  User::find($userdata['distributor']);   
+                                $sdbalUpdate =  ['cd_balance' => $creditCommSD->cd_balance - $charges['sdcomm']];
+                                $distbalUpdate =  ['cd_balance' => $creditCommDIST->cd_balance - $charges['dcomm']]; 
+                                $isupdate22 = User::where('id',$userdata['supdistributor'])->update($sdbalUpdate);
+                                //dd($isupdate22);
+                                $isupdate1 = User::where('id',$userdata['distributor'])->update($distbalUpdate);
                                 $post1['ttype'] = 0;
                                 $post1['utype'] = 'credit';
                                 $post1['comm']  = 0;
@@ -118,7 +126,7 @@ class Prepaidrecharge extends Controller
                                 $post1['uid'] = $userdata->id;
                                 $post1['amount'] = $ins_array['amount'] - $charges['comm'];
                                 $post1['narration'] = "Transaction FAILED for A/C ".$ins_array['canumber']." amount of ".$ins_array['amount']; 
-                                $post1['creditamount'] =$ins_array['amount'] - $charges['comm'];
+                                $post1['creditamount'] = $ins_array['amount'] - $charges['comm'];
                                 $rechcredit = RechargeTrait::credit($post1);
                                 $txnupdate = [
                                     'refundtxnid' => $rechcredit['txnno'],
@@ -162,7 +170,7 @@ class Prepaidrecharge extends Controller
                         }else { 
                             $response = [
                                 'errors' => "invalid!",
-                                'message' =>  $request['message']
+                                'message' =>  $requestdata['message']
                             ];
                             return $this->response('notvalid', $response); 
                         } 

@@ -94,7 +94,9 @@ class PayoutController extends Controller
             $query->leftjoin('transaction_cashdeposit as tb2', 'tb2.id', '=', 'recharge.refundtxnid');
             $query->select(
                 'recharge.id as id',
-                'recharge.txnid as txnid',  
+                'recharge.txnid as txnid',
+                'recharge.refundtxnid as refundtxnid',
+                'recharge.refid as orderid',  
                 'recharge.canumber as canumber',
                 'recharge.operatorname as operatorname',
                 'recharge.operatorid as operatorid', 
@@ -104,6 +106,8 @@ class PayoutController extends Controller
                 'recharge.dateadded as addeddate',
                 'users.username as username', 
                 'recharge.comm as comm',      
+                'recharge.sdcomm as sdcomm',      
+                'recharge.dcomm as dcomm',     
                 'tb1.cd_opening as opening',
                 'tb1.cd_closing as closing',
                 'tb1.narration as remarks',
@@ -140,13 +144,12 @@ class PayoutController extends Controller
                 });
             
             
-                if($request->user()->role == 5){
+            if($request->user()->role == 5){
                 $userid =  $request->user()->id;
                 $query->where('recharge.userid',$userid);
             }
            
-            $totaldata = $query->get()->toArray();
-             
+            $totaldata = $query->get()->toArray(); 
             $recordsTotal = $query->count();
             
              
@@ -158,19 +161,26 @@ class PayoutController extends Controller
                 $data = $query->get()->toArray();
                 $recordsFiltered = $query->count();
             }
-            
+            if($request->user()->user_type == 0){
+                $head           = HEADERTrait::txn_header();
+            }else{
+                $head           = HEADERTrait::txn_rec_user_header();
+            }
             
             if(!empty($data)){
                 foreach($data as $key=>$datum){  
+                    // if($datum->credit){
+                    //     $data[$key]->credits =   $datum->credit+$datum->commcredit;
+                    // }
                     if($datum->status){
-                        $data[$key]->status =   $this->Stmtstatus[$datum->status];
+                        $data[$key]->status =   $datum->status;
                         $dateTime = new DateTime($datum->addeddate, new DateTimeZone('Asia/Kolkata'));  
                         // echo $dateTime->format("d/m/y  g:i A");
                         $data[$key]->addeddate =   $dateTime->format("d-m-Y  g:i:s A"); 
 
                     } 
                 }
-                return $this->response('success', ['message' => "Success.",'data' => $data,'recordsFiltered' => $recordsFiltered,'recordsTotal'    => $recordsTotal]); 
+                return $this->response('success', ['message' => "Success.",'header' => $head,'data' => $data,'recordsFiltered' => $recordsFiltered,'recordsTotal'=> $recordsTotal]); 
             }else{
                 return $this->response('noresult', ['statuscode'=>200]); 
             }

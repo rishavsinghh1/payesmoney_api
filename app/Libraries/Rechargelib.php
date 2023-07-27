@@ -65,7 +65,7 @@ class Rechargelib{
          return $response;
      }
 
-     public static function dorecharge($request){ 
+    public static function dorecharge($request){ 
         $data = [
             'method' => $request['method'],
             'apiname'=> $request['apiname'],
