@@ -50,21 +50,15 @@ trait RechargeTrait
         $wttype = self::wttype('main'); 
         DB::unprepared("LOCK TABLES tbl_transaction_cashdeposit as t READ,tbl_transaction_cashdeposit WRITE,tbl_users as u READ, tbl_users WRITE,tbl_recharge as r READ, tbl_recharge  WRITE");
         $query = DB::select(("SELECT SQL_NO_CACHE u.id,u.cd_balance,u.username,t.cd_closing from tbl_transaction_cashdeposit as t left JOIN tbl_users as u on t.uid=u.id where t.uid=".$reqData['uid']." and t.ttype in(".implode(",",$wttype).")  ORDER by t.id desc limit 1"));
-        $u_data =  $query[0];
-        $creditCommSD =  User::find($reqData['sdid']); 
-        $creditCommDIST =  User::find($reqData['did']);   
+        $u_data =  $query[0];   
          $stmtData['cd_opening']   =  $u_data->cd_balance;
          $stmtData['cd_closing']   =  ($stmtData['cd_opening']-$agentcl);
 
          if(count($query)!=0 && $u_data->cd_balance>=$agentcl){
             if(self::roundval($u_data->cd_closing) == self::roundval($u_data->cd_balance)){
                 $cd_balance = $u_data->cd_balance - $agentcl;
-                $userupdate = ['cd_balance' => $cd_balance];
-                $sdbalUpdate =  ['cd_balance' => $creditCommSD->cd_balance + $reqData['sdcomm']];
-                $distbalUpdate =  ['cd_balance' => $creditCommDIST->cd_balance + $reqData['dcomm']];
-                $isupdate = User::where('id', $reqData['uid'])->update($userupdate);
-                $isupdate = User::where('id', $reqData['sdid'])->update($sdbalUpdate);
-                $isupdate = User::where('id', $reqData['did'])->update($distbalUpdate);
+                $userupdate = ['cd_balance' => $cd_balance]; 
+                $isupdate = User::where('id', $reqData['uid'])->update($userupdate); 
                 if($isupdate){
                     $insertedid = CashTransaction::insertGetId($stmtData);
                     if($insertedid){
@@ -114,7 +108,11 @@ trait RechargeTrait
         $all    =   array("main"=>array(0,1,3,4,5,6,7,8,9,11,12,13,14,23,25),"cash"=>array(7,11,13,100,101,102,103,104),"partner"=>array(0,1,10)); 
         return $all[$type]; 
     }
-    public static function credit($req){ 
+    public static function txn_type($type){
+        $all  = array("0" => "Fund Transfer", "1" => "Fund Debit", "2" => "Fund Receiving", "3" => "Bank Charges", "4" => "Penny Drop", "5" => "DMT", "6" => "Recharge", "7" => "Bill Payment", "8" => "Wallet", "9" => "Credit Card", "10" => "Commission", "11" => "Cash To Main", "12" => "PG", "13" => "Pan Token", "100" => "AEPS Cashwithdrawal", "101" => "Aadhaar Pay", "102" => "Mini Statement", "103" => "Settlement", "104" => "Matm Cashwithdrawal");
+        return $all[$type]; 
+    }
+   public static function credit($req){ 
         
         $return     =   array();
         if(isset($req['sid'])){ $stmtData['sid']=$req['sid']; }
@@ -151,7 +149,7 @@ trait RechargeTrait
         $query = DB::select(("SELECT SQL_NO_CACHE u.id, u.cd_balance, u.username,t.cd_closing from tbl_transaction_cashdeposit as t left JOIN tbl_users as u on t.uid=u.id where t.uid=".$req['uid']." and t.ttype in(".implode(",",$wttype).")  ORDER by t.id desc limit 1"));
         $u_data =  $query[0];
          $stmtData['cd_opening']   =   $u_data->cd_balance;
-         $stmtData['cd_closing']   =   round($stmtData['cd_opening'] + $agentcl);
+         $stmtData['cd_closing']   =   round($stmtData['cd_opening'] + $agentcl , 1);
         if(count($query)!=0 ){
             if(self::roundval($u_data->cd_closing) == self::roundval($u_data->cd_balance)){
                 $balance = round($u_data->cd_balance + $agentcl, 1);

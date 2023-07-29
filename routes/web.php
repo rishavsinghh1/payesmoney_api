@@ -161,11 +161,15 @@ $router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge')
         $router->post('get-user', ['as' => 'user-edit', 'uses' => 'User\UserController@getUser']);
         
         $router->group(['prefix' => 'superdist'], function () use ($router) { 
-            $router->post('create', 'User\SD\SuperDistController@create');  
+            $router->post('create', 'User\SD\SuperDistController@create'); 
+            $router->post('list', 'User\SD\SuperDistController@list');   
+            $router->post('superdistributor','ConfigurationController@superdistributor');
             
         });
         $router->group(['prefix' => 'dist'], function () use ($router) { 
-            $router->post('create', 'User\DIST\DistController@create');  
+            $router->post('create', 'User\DIST\DistController@create');
+            $router->post('distributor','ConfigurationController@distributor');  
+            
             
         });
         $router->group(['prefix' => 'retailer'], function () use ($router) { 

@@ -12,10 +12,12 @@ use App\Http\Traits\HeaderTrait;
 use App\Http\Traits\ChargesTrait;
 use App\Http\Traits\RechargeTrait;
 use App\Libraries\Rechargelib;
+use App\Libraries\FundTrait;
+use App\Models\CashTransaction;
 use Illuminate\Support\Facades\Auth;
 class Dthrecharge extends Controller
 {
-    use CommonTrait,HeaderTrait,ChargesTrait,RechargeTrait;
+    use CommonTrait,HeaderTrait,ChargesTrait,RechargeTrait,FundTrait;
     public function __construct()
     {
         $this->status = ['0'=>'Deactive','1'=>'Active'];
@@ -63,10 +65,10 @@ class Dthrecharge extends Controller
                             $requestdata =  RechargeTrait::process($ins_array);  
                         if($requestdata['status']==1 && $requestdata['txnno']!=""){ 
                             $update_request = Recharge::where("id", $requestdata['orderid'])
-                            ->update(["status" => 3]);  
+                            ->update(["status" => 1]);  
                             if($update_request==1){
                                 $reqData = array(
-                                    'operator'      =>  $operator->op_id,
+                                    'operator'      =>  $name = str_replace(' ', '_',$operator->op_id),
                                     'canumber'      =>  $ins_array['canumber'],
                                     'amount'        =>  $ins_array['amount'],
                                     'referenceid'   =>  $request->referenceid,
@@ -125,7 +127,7 @@ class Dthrecharge extends Controller
                                     'daterefunded' => date('Y-m-d'),
                                 ];
                                 $isupdate = Recharge::where('id', $requestdata['orderid'])->update($txnupdate); 
-
+                                $isupdatecash = CashTransaction::where('id', $requestdata['txnno'])->update(['refunded' => 1]);
                                 $response = [
                                     'message' => "FAILED",
                                     'txnno'=>$requestdata['txnno'],

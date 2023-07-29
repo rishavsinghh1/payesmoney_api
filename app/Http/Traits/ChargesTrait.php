@@ -35,19 +35,19 @@ trait ChargesTrait
                     $dcomm = 0; 
                     $sdcomm = 0;
                 } elseif ($operator == 11) {
-                    $rcomm = $amount * (1 / 100);
-                    $dcomm = $amount * (0.2 / 100); 
-                    $sdcomm = $amount * (0.2 / 100);
+                    $rcomm = $amount * (2.0 / 100);
+            $dcomm = $amount * (0.5 / 100); 
+            $sdcomm = $amount * (0.10 / 100);
                 } else {
-                    $rcomm = $amount * (1.5 / 100);
-                    $dcomm = $amount * (0.2 / 100); 
-                    $sdcomm = $amount * (0.2 / 100);
+                    $rcomm = $amount * (2.0 / 100);
+                    $dcomm = $amount * (0.5 / 100); 
+                    $sdcomm = $amount * (0.10 / 100);
                 }
             }
         } else {
-            $rcomm = $amount * (1.5 / 100);
-            $dcomm = $amount * (0.2 / 100); 
-            $sdcomm = $amount * (0.2 / 100);
+            $rcomm = $amount * (2.0 / 100);
+            $dcomm = $amount * (0.5 / 100); 
+            $sdcomm = $amount * (0.10 / 100);
         }
         return array("comm" => $rcomm, "dcomm" => $dcomm, "sdcomm" => $sdcomm );
            

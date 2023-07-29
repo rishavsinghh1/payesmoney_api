@@ -251,6 +251,7 @@ trait HeaderTrait
         $column[] = ['name' => 'txnid', 'value' => 'TXN ID', 'is_show' => $isshow, 'issort' => $issort]; 
         $column[] = ['name' => 'addeddate', 'value' => 'REQ TIME', 'is_show' => $isshow, 'issort' => $issort]; 
         $column[] = ['name' => 'username', 'value' => 'UserID', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'firmname', 'value' => 'FIRM', 'is_show' => $isshow, 'issort' => $issort];
         $column[] = ['name' => 'operatorname', 'value' => 'Operator', 'is_show' => $isshow, 'issort' => $issort]; 
         $column[] = ['name' => 'canumber', 'value' => 'DEVICE', 'is_show' => $isshow, 'issort' => 0];
         $column[] = ['name' => 'amount', 'value' => 'Amount', 'is_show' => $isshow, 'issort' => 0];  
@@ -293,4 +294,21 @@ trait HeaderTrait
        
         return $column;
     } 
+
+
+    static function SdHeader()
+    {
+        $isshow = 1;
+        $issort = 1;
+        $result[] = ['name' => 'fullname', 'value' => 'NAME', 'is_show' => 1, 'issort' => 0];
+        $result[] = ['name' => 'username', 'value' => 'USERNAME', 'is_show' => 1, 'issort' => 0];
+        $result[] = ['name' => 'email', 'value' => 'EMAIL', 'is_show' => 1, 'issort' => 0];
+        $result[] = ['name' => 'phone', 'value' => 'PHONE', 'is_show' => 1, 'issort' => 0]; 
+        $result[] = ['name' => 'cd_balance', 'value' => 'BALANCE', 'is_show' => 1, 'issort' => 0]; 
+        $result[] = ['name' => 'status', 'value' => 'STATUS', 'is_show' => 1, 'issort' => 0];
+        $result[] = ['name' => 'is_kyc', 'value' => 'KYC STATUS', 'is_show' => 1, 'issort' => 0]; 
+        $result[] = ['name' => 'pannumber', 'value' => 'PANNUMBER', 'is_show' => 1, 'issort' => 0];
+        $result[] = ['name' => 'addeddate', 'value' => 'ADDEDDATE', 'is_show' => 1, 'issort' => 0]; 
+        return $result;
+    }
 }

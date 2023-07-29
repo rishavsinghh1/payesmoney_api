@@ -13,10 +13,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Config;
 use App\Models\UserPasswordDetails as UserPassword;
+use DateTime;
+use DateTimeZone;
+use Carbon\Carbon;
 class SuperDistController extends Controller
 {
     use CommonTrait,HeaderTrait;
     public function __construct() {
+        $this->today      = Carbon::now()->toDateString(); 
         $this->status = ['0' => "Pending", '1' => "Active", '2' => "Deactive"];
     }
 
@@ -135,4 +139,76 @@ class SuperDistController extends Controller
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
     }
+
+    public function list(Request $request){ 
+        
+        try {
+            $userdata = Auth::user();
+            $startdate     = trim(strip_tags($request->startdate));
+            $enddate       = trim(strip_tags($request->enddate));
+            $status        = trim(strip_tags($request->status));
+            $userid        = trim(strip_tags($request->userid)); 
+            $start         = trim(strip_tags($request->start));
+            $length        = trim(strip_tags($request->length));
+            $order         = trim(strip_tags($request->order)); 
+            $search        = trim(strip_tags($request->search));  
+            $query = DB::table('users'); 
+            $query->leftjoin('user_kyc_doc as ukd', 'ukd.userid', '=', 'users.id');
+            $query->select('users.id','users.fullname','users.username','users.firmname','users.email'
+            ,'users.phone','users.altmobile','users.status','users.is_kyc','users.addeddate','users.minbalance','users.gstnumber','users.address','users.state','users.pincode','users.balance','users.cd_balance','users.role','users.pannumber','users.balance','users.cd_balance'
+                );
+          
+
+            // if ($userdata['role'] == 2) {
+            //     $supdistributor = $userdata['id'];
+            // }
+
+            (!empty($orderby) && !empty($order))? $query->orderBy('users.'.$orderby, $order): $query->orderBy("users.id", "desc");
+                $query->where(function ($q) use ($search) {
+                    if (!empty($search)) {
+                        $q->orWhere('users.name', 'LIKE', "%{$search}%");
+                        $q->orWhere('users.username', 'LIKE', "%{$search}%"); 
+                        $q->orWhere('users.email', 'LIKE', "%{$search}%");
+                        $q->orWhere('users.phone', 'LIKE', "%{$search}%"); 
+                    }
+                    return $q;
+                });
+            
+            $query->where('users.role',3);
+            if($request->user()->role == 3){
+                $userid =  $request->user()->id;
+                $query->where('users.id',$userid);
+            }
+           
+            $totaldata = $query->get()->toArray(); 
+            $recordsTotal = $query->count(); 
+            if ($length != "" && $start !="") {
+                $data = $query->skip($start)->take($length)->get()->toArray();
+                $recordsFiltered = count($data);
+            }else{
+                $data = $query->get()->toArray();
+                $recordsFiltered = $query->count();
+            }
+            if($request->user()->user_type == 0){
+                $head           = HEADERTrait::SdHeader();
+            }else{
+                $head           = HEADERTrait::SdHeader();
+            }
+            if(!empty($data)){
+                foreach($data as $key=>$datum){   
+                    if($datum->status){
+                        $data[$key]->status =   $datum->status; 
+                    } 
+                    $dateTime = new DateTime($datum->addeddate, new DateTimeZone('Asia/Kolkata'));   
+                    $data[$key]->addeddate =   $dateTime->format("d-m-Y  g:i:s A"); 
+                }
+                return $this->response('success', ['message' => "Success.",'header' => $head, 'data' => $data,'recordsFiltered' => $recordsFiltered,'recordsTotal'=> $recordsTotal]); 
+            }else{
+                return $this->response('noresult', ['statuscode'=>200]); 
+            }
+        } catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]);
+        }
+    }
+    
 }

@@ -105,6 +105,7 @@ class PayoutController extends Controller
                 'recharge.status as status',
                 'recharge.dateadded as addeddate',
                 'users.username as username', 
+                'users.firmname as firmname', 
                 'recharge.comm as comm',      
                 'recharge.sdcomm as sdcomm',      
                 'recharge.dcomm as dcomm',     
