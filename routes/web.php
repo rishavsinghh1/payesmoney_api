@@ -168,12 +168,14 @@ $router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge')
         });
         $router->group(['prefix' => 'dist'], function () use ($router) { 
             $router->post('create', 'User\DIST\DistController@create');
+            $router->post('list', 'User\DIST\DistController@list'); 
             $router->post('distributor','ConfigurationController@distributor');  
             
             
         });
         $router->group(['prefix' => 'retailer'], function () use ($router) { 
-            $router->post('create', 'User\REATILER\RetailerController@create');  
+            $router->post('create', 'User\REATILER\RetailerController@create'); 
+            $router->post('list', 'User\REATILER\RetailerController@list');  
             
         });
          

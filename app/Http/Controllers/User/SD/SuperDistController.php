@@ -140,10 +140,10 @@ class SuperDistController extends Controller
         }
     }
 
-    public function list(Request $request){ 
-        
+    public function list(Request $request){  
         try {
             $userdata = Auth::user();
+        if ($userdata && in_array($userdata->role, array(1,2,3))) {
             $startdate     = trim(strip_tags($request->startdate));
             $enddate       = trim(strip_tags($request->enddate));
             $status        = trim(strip_tags($request->status));
@@ -206,9 +206,17 @@ class SuperDistController extends Controller
             }else{
                 return $this->response('noresult', ['statuscode'=>200]); 
             }
+        }else { 
+            $response = [
+                'errors' => "invalid!",
+                'message' => "Validation error your request is not allow at server end"
+            ];
+            return $this->response('notvalid', $response); 
+        }  
         } catch (\Throwable $th) {
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
+    
     }
     
 }
