@@ -137,4 +137,62 @@ class UserController extends Controller
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
     }
+
+    public function getsuperdistributor(Request $request){ 
+        $userdata = Auth::user(); 
+        if($userdata){
+            $return =   array();
+            $filter['usertype'] = 2; 
+            
+            if ($userdata['usertype'] == 3) {
+                $filter['sd'] = $userdata->userid;
+               // $query->orwhere($filter['sd']);
+            }
+            $search = $request->input('searchvalue');
+            $users  =  $query = DB::table('users');
+            $query->select('id','fullname','email','phone','username'); 
+            $query->where(function ($query) use ($search) {
+                $query->where('fullname', 'like',  trim($search) . '%')
+                 ->orwhere('email', 'like', trim($search) . '%')
+                 ->orwhere('phone', 'like',  trim($search) . '%') 
+                 ->orwhere('username', 'like', trim($search) . '%');
+                });  
+            $query->where('status',1); 
+            $query->orderBy('id','DESC');
+            $query->limit(5);
+            $totaldata = $query->get();
+            return $this->response('success', ['data' => $totaldata]);
+        }else{
+            return $this->response('noresult');
+        } 
+    }
+    public function getdistributor(Request $request){
+        $userdata = Auth::user(); 
+        dd($userdata);
+        if($userdata){
+            $return =   array();
+            $filter['usertype'] = 1; 
+            
+            if ($userdata['usertype'] == 5) {
+                $filter['dist'] = $userdata->userid;
+            }
+            $search = $request->input('searchvalue');
+            $users  =  $query = DB::table('users');
+            $query->select('id','fullname','email','phone','username'); 
+            $query->where(function ($query) use ($search) {
+                $query->where('fullname', 'like',  trim($search) . '%')
+                 ->orwhere('email', 'like', trim($search) . '%')
+                 ->orwhere('phone', 'like',  trim($search) . '%') 
+                 ->orwhere('username', 'like', trim($search) . '%');
+                });  
+            $query->where('status',1);
+            $query->where($filter['dist']);
+            $query->orderBy('id','DESC');
+            $query->limit(5);
+            $totaldata = $query->get();
+            return $this->response('success', ['data' => $totaldata]);
+        }else{
+            return $this->response('noresult');
+        } 
+    }
 }

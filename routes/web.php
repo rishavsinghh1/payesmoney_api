@@ -164,12 +164,15 @@ $router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge')
             $router->post('create', 'User\SD\SuperDistController@create'); 
             $router->post('list', 'User\SD\SuperDistController@list');   
             $router->post('superdistributor','ConfigurationController@superdistributor');
+            $router->post('getsuperdistributor', 'User\UserController@getsuperdistributor');   
+            
             
         });
         $router->group(['prefix' => 'dist'], function () use ($router) { 
             $router->post('create', 'User\DIST\DistController@create');
             $router->post('list', 'User\DIST\DistController@list'); 
             $router->post('distributor','ConfigurationController@distributor');  
+            $router->post('getdistributor', 'User\UserController@getdistributor');  
             
             
         });
