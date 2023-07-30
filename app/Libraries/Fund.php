@@ -8,7 +8,7 @@ use App\Libraries\Common\User as Userlib;
 class Fund{ 
     public static function getrequest($reqid){
         $creditrequest['request'] = self::getcreditrequest($reqid);
-        
+       
         if($creditrequest['request']){
              $creditrequest['lastapproverequest'] = self::getcreditordetails($creditrequest['request']['userid'],$creditrequest['request']['amount']);
         $debiterrow = User::select('id','username','cd_balance')
@@ -43,8 +43,7 @@ class Fund{
                      'creditrequest.created_at'
               )
                   ->leftJoin('users','users.id', '=', 'creditrequest.userid')
-                  ->leftJoin('companybank','companybank.id', '=', 'creditrequest.bankid')
-                  ->where('users.role',5)
+                  ->leftJoin('companybank','companybank.id', '=', 'creditrequest.bankid') 
                   ->where('creditrequest.status',2) 
                   ->where('creditrequest.id',$reqid)
                   ->first();  

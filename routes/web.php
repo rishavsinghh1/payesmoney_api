@@ -46,8 +46,7 @@ $router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge')
     $router->group(['middleware' => ['auth:api','checkperm']], function () use ($router) { 
         $router->group(['prefix' => 'user'], function () use ($router) {
             $router->post('register', ['as' => 'user-register', 'uses' => 'Auth\RegisterController@register']);
-            $router->post('list-user', ['as' => 'user-list', 'uses' => 'User\UserController@listUsers']);
-            $router->post('get-user', ['as' => 'user-edit', 'uses' => 'User\UserController@getUser']);
+            $router->post('list-user', ['as' => 'user-list', 'uses' => 'User\UserController@listUsers']); 
             $router->post('update-user', ['as' => 'user-update', 'uses' => 'User\UserController@updateUser']);
             $router->post('assigned-modules', ['as' => 'assigned-modules', 'uses' => 'Master\AdminConfigController@getModulePermission']);
             $router->post('assign-modules', ['as' => 'user-module-assign', 'uses' => 'Master\AdminConfigController@updateModulePermission']);
@@ -158,7 +157,7 @@ $router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge')
              
             
         });
-        $router->post('get-user', ['as' => 'user-edit', 'uses' => 'User\UserController@getUser']);
+        $router->post('user/get-user', ['as' => 'get-user', 'uses' => 'User\UserController@getUser']); 
         
         $router->group(['prefix' => 'superdist'], function () use ($router) { 
             $router->post('create', 'User\SD\SuperDistController@create'); 
@@ -181,6 +180,10 @@ $router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge')
             $router->post('list', 'User\REATILER\RetailerController@list');  
             
         });
+        $router->group(['prefix' => 'ledger'], function () use ($router) { 
+            $router->post('txn-ledger', 'Reports\PayoutController@ledgerrecord');   
+        });
+       
          
         $router->group(['prefix' => 'funding'], function () use ($router) { 
             $router->post('create', 'funding\FundingController@create');  
@@ -191,7 +194,7 @@ $router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge')
             $router->post('getFundingRequestDetail', 'funding\FundingController@getFundingRequestDetail'); 
             $router->post('getlistfund','funding\FundingController@getpendingFund');
             $router->post('getpendingById','funding\FundingController@getpendingById');
-            
+            $router->post('getrequest', 'funding\FundingController@Getrequest');
             
         });
         $router->group(['prefix' => 'commission'], function () use ($router) {

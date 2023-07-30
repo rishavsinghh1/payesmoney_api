@@ -7,7 +7,7 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
+use App\Models\User; 
 use App\Models\CashTransaction;
 use Illuminate\Support\Facades\DB;
 use App\Models\UserPasswordDetails as UserPassword;
@@ -138,10 +138,11 @@ trait FundTrait
                             $return['message']  =   "This transaction cannot be processed. Please try later.";
                         }
                         $cashData = CashTransaction::insert($request_ins);
+                        $insertId =DB::getPdo()->lastInsertId();
                         if($cashData){
                         $creditbalance =  DB::table('users')->where('id', $creditor->id)->update(['cd_balance' =>DB::raw('cd_balance+'.$request['amount']),'othercredit' =>DB::raw('othercredit+'.$request['amount'])]); 
                             if($creditbalance){
-                                $creditbalance =  DB::table('creditrequest')->where('id',$request['id'])->update(['status' =>1]); 
+                                $creditbalance =  DB::table('creditrequest')->where('id',$request['id'])->update(['status' =>1,'txnid' =>$insertId]); 
                                 $return['status']   =   1;
                                 $return['message']  =   "Transaction Successful";
                                 $return['newbalance']  =   $debt_closing;
@@ -238,7 +239,7 @@ trait FundTrait
   
             $naration = "Balance transfer amount " . $amount . " from " . $debitor->username . " to " . $creditor->username;
             $transaction = array("amount" => $amount, "narration" => $naration, "remarks" => $reqdata['remarks'], "ipaddress" => $reqdata['ipaddress'], "ttype" => 0, "addeddate" =>self::GetuserId('DATE'), "sid" =>self::GetuserId('SUPERADMIN'));
-            
+          
             //creditor transaction
             if ($creditor->role == 5) {
                 //credit to retailer
@@ -255,7 +256,7 @@ trait FundTrait
                 $transaction['dclosing'] = $cclosing;
                 $where_array = array('did' => $creditor->id);
                 $closing = "dclosing";
-            }elseif ($creditor->usertype == 3) {
+            }elseif ($creditor->role == 3) {
                 $transaction['sdid'] = $creditor->id;
                 $transaction['sdtype'] = "credit";
                 $transaction['sdopening'] = $copening;

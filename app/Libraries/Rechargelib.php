@@ -48,7 +48,7 @@ class Rechargelib{
            CURLOPT_CUSTOMREQUEST => $request['method'],
            CURLOPT_POSTFIELDS => json_encode($request['parameter']),
            CURLOPT_HTTPHEADER => [  
-             "Apikey: " . static::$authkey,
+             "Apikey: " . static::$authkeylocal,
              "accept: application/json",
              "content-type: application/json"
            ],
@@ -69,7 +69,7 @@ class Rechargelib{
         $data = [
             'method' => $request['method'],
             'apiname'=> $request['apiname'],
-            'url'    => static::$liveurl.'recharge',
+            'url'    => static::$url.'recharge',
 
             'parameter' => [ 
                     'mobileno'   => $request['canumber'],
@@ -84,7 +84,7 @@ class Rechargelib{
         $data = [
             'method' => $request['method'],
             'apiname'=> $request['apiname'],
-            'url'    => static::$liveurl.'dthrecharge',
+            'url'    => static::$url.'dthrecharge',
 
             'parameter' => [ 
                     'mobileno'   => $request['canumber'],

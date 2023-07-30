@@ -244,54 +244,102 @@ trait HeaderTrait
     }
 
 
-    static function txn_header()
+    static function txn_ADMIN_header()
     {
         $isshow = 1;
         $issort = 1;
         $column[] = ['name' => 'txnid', 'value' => 'TXN ID', 'is_show' => $isshow, 'issort' => $issort]; 
-        $column[] = ['name' => 'addeddate', 'value' => 'REQ TIME', 'is_show' => $isshow, 'issort' => $issort]; 
-        $column[] = ['name' => 'username', 'value' => 'UserID', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'addeddate', 'value' => 'DATE TIME', 'is_show' => $isshow, 'issort' => $issort]; 
+        $column[] = ['name' => 'username', 'value' => 'USERID', 'is_show' => $isshow, 'issort' => $issort];
         $column[] = ['name' => 'firmname', 'value' => 'FIRM', 'is_show' => $isshow, 'issort' => $issort];
-        $column[] = ['name' => 'operatorname', 'value' => 'Operator', 'is_show' => $isshow, 'issort' => $issort]; 
+        $column[] = ['name' => 'operatorname', 'value' => 'OPERATOR', 'is_show' => $isshow, 'issort' => $issort]; 
         $column[] = ['name' => 'canumber', 'value' => 'DEVICE', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'amount', 'value' => 'Amount', 'is_show' => $isshow, 'issort' => 0];  
-        $column[] = ['name' => 'status', 'value' => 'Status', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'amount', 'value' => 'AMOUNT', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'status', 'value' => 'STATUS', 'is_show' => $isshow, 'issort' => 0];
         $column[] = ['name' => 'operatorid', 'value' => 'OPID', 'is_show' => $isshow, 'issort' => 0]; 
         $column[] = ['name' => 'diff', 'value' => 'DIFF', 'is_show' => $isshow, 'issort' => 0]; 
-        $column[] = ['name' => 'refundtxnid', 'value' => 'Refund ID', 'is_show' => $isshow, 'issort' => 0];  
-        $column[] = ['name' => 'opening', 'value' => 'Opening', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'debit', 'value' => 'Debit', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'comm', 'value' => 'Comm', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'credit', 'value' => 'Credit', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'closing', 'value' => 'Closing', 'is_show' => $isshow, 'issort' => 0]; 
-        $column[] = ['name' => 'sdcomm', 'value' => 'SD Comm', 'is_show' => $isshow, 'issort' => 0]; 
-        $column[] = ['name' => 'dcomm', 'value' => 'DIST Comm', 'is_show' => $isshow, 'issort' => 0];    
-        $column[] = ['name' => 'adminp', 'value' => 'Admin (P)', 'is_show' => $isshow, 'issort' => 0];  
-        $column[] = ['name' => 'orderid', 'value' => 'ORDER ID', 'is_show' => $isshow, 'issort' => 0]; 
-        $column[] = ['name' => 'restime', 'value' => 'RES TIME', 'is_show' => $isshow, 'issort' => $issort];  
+        $column[] = ['name' => 'refundtxnid', 'value' => 'REFUND ID', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'opening', 'value' => 'OPENING', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'debit', 'value' => 'DEBIT', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'credit', 'value' => 'CREDIT', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'closing', 'value' => 'CLOSING', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'sdcomm', 'value' => 'SD COMM', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'dcomm', 'value' => 'DIST COMM', 'is_show' => $isshow, 'issort' => 0];    
+        $column[] = ['name' => 'comm', 'value' => 'RT COMM', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'orderid', 'value' => 'ORDER ID', 'is_show' => $isshow, 'issort' => 0];  
+        return $column;
+    } 
+    static function txn_SD_header()
+    {
+        $isshow = 1;
+        $issort = 1;
+        $column[] = ['name' => 'txnid', 'value' => 'TXN ID', 'is_show' => $isshow, 'issort' => $issort]; 
+        $column[] = ['name' => 'addeddate', 'value' => 'DATE TIME', 'is_show' => $isshow, 'issort' => $issort]; 
+        $column[] = ['name' => 'username', 'value' => 'USERID', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'firmname', 'value' => 'FIRM', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'operatorname', 'value' => 'OPERATOR', 'is_show' => $isshow, 'issort' => $issort]; 
+        $column[] = ['name' => 'canumber', 'value' => 'DEVICE', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'amount', 'value' => 'AMOUNT', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'status', 'value' => 'STATUS', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'operatorid', 'value' => 'OPID', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'diff', 'value' => 'DIFF', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'refundtxnid', 'value' => 'REFUND ID', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'opening', 'value' => 'OPENING', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'debit', 'value' => 'DEBIT', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'credit', 'value' => 'CREDIT', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'closing', 'value' => 'CLOSING', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'sdcomm', 'value' => 'SD COMM', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'dcomm', 'value' => 'DIST COMM', 'is_show' => $isshow, 'issort' => 0];    
+        $column[] = ['name' => 'comm', 'value' => 'RT COMM', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'orderid', 'value' => 'ORDER ID', 'is_show' => $isshow, 'issort' => 0];  
+        return $column;
+    } 
+    static function txn_DIST_header()
+    {
+        $isshow = 1;
+        $issort = 1;
+        $column[] = ['name' => 'txnid', 'value' => 'TXN ID', 'is_show' => $isshow, 'issort' => $issort]; 
+        $column[] = ['name' => 'addeddate', 'value' => 'DATE TIME', 'is_show' => $isshow, 'issort' => $issort]; 
+        $column[] = ['name' => 'username', 'value' => 'USERID', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'firmname', 'value' => 'FIRM', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'operatorname', 'value' => 'OPERATOR', 'is_show' => $isshow, 'issort' => $issort]; 
+        $column[] = ['name' => 'canumber', 'value' => 'DEVICE', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'amount', 'value' => 'AMOUNT', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'status', 'value' => 'STATUS', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'operatorid', 'value' => 'OPID', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'diff', 'value' => 'DIFF', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'refundtxnid', 'value' => 'REFUND ID', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'opening', 'value' => 'OPENING', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'debit', 'value' => 'DEBIT', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'credit', 'value' => 'CREDIT', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'closing', 'value' => 'CLOSING', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'dcomm', 'value' => 'DIST COMM', 'is_show' => $isshow, 'issort' => 0];    
+        $column[] = ['name' => 'comm', 'value' => 'RT COMM', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'orderid', 'value' => 'ORDER ID', 'is_show' => $isshow, 'issort' => 0];  
         return $column;
     } 
 
-    static function txn_rec_user_header()
+    static function txn_REATILER_header()
     {
         $isshow = 1;
-        $issort = 1;  
-        $column[] = ['name' => 'reqid', 'value' => 'REQ ID', 'is_show' => $isshow, 'issort' => 0]; 
+        $issort = 1;
         $column[] = ['name' => 'txnid', 'value' => 'TXN ID', 'is_show' => $isshow, 'issort' => $issort]; 
-        $column[] = ['name' => 'mobnumber', 'value' => 'AccountNo', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'operatorname', 'value' => 'Operator', 'is_show' => $isshow, 'issort' => $issort];  
-        $column[] = ['name' => 'addeddate', 'value' => 'DateTime', 'is_show' => $isshow, 'issort' => $issort]; 
-        $column[] = ['name' => 'opening', 'value' => 'Opening', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'amount', 'value' => 'Amount', 'is_show' => $isshow, 'issort' => 0]; 
-        $column[] = ['name' => 'debit', 'value' => 'Debit', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'comm', 'value' => 'Comm', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'credit', 'value' => 'Credit', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'closing', 'value' => 'Closing', 'is_show' => $isshow, 'issort' => 0];  
-        $column[] = ['name' => 'refundtxnid', 'value' => 'Refund ID', 'is_show' => $isshow, 'issort' => 0];  
-        $column[] = ['name' => 'status', 'value' => 'Status', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'operatorid', 'value' => 'Live ID', 'is_show' => $isshow, 'issort' => 0];
-       
-       
+        $column[] = ['name' => 'addeddate', 'value' => 'DATE TIME', 'is_show' => $isshow, 'issort' => $issort]; 
+        $column[] = ['name' => 'username', 'value' => 'USERID', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'firmname', 'value' => 'FIRM', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'operatorname', 'value' => 'OPERATOR', 'is_show' => $isshow, 'issort' => $issort]; 
+        $column[] = ['name' => 'canumber', 'value' => 'DEVICE', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'amount', 'value' => 'AMOUNT', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'status', 'value' => 'STATUS', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'operatorid', 'value' => 'OPID', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'diff', 'value' => 'DIFF', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'refundtxnid', 'value' => 'REFUND ID', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'opening', 'value' => 'OPENING', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'debit', 'value' => 'DEBIT', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'credit', 'value' => 'CREDIT', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'closing', 'value' => 'CLOSING', 'is_show' => $isshow, 'issort' => 0];    
+        $column[] = ['name' => 'comm', 'value' => 'RT COMM', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'orderid', 'value' => 'ORDER ID', 'is_show' => $isshow, 'issort' => 0];  
         return $column;
     } 
 
@@ -305,10 +353,37 @@ trait HeaderTrait
         $result[] = ['name' => 'email', 'value' => 'EMAIL', 'is_show' => 1, 'issort' => 0];
         $result[] = ['name' => 'phone', 'value' => 'PHONE', 'is_show' => 1, 'issort' => 0]; 
         $result[] = ['name' => 'cd_balance', 'value' => 'BALANCE', 'is_show' => 1, 'issort' => 0]; 
-        $result[] = ['name' => 'status', 'value' => 'STATUS', 'is_show' => 1, 'issort' => 0];
-        $result[] = ['name' => 'is_kyc', 'value' => 'KYC STATUS', 'is_show' => 1, 'issort' => 0]; 
+        // $result[] = ['name' => 'status', 'value' => 'STATUS', 'is_show' => 1, 'issort' => 0];
+        // $result[] = ['name' => 'is_kyc', 'value' => 'KYC STATUS', 'is_show' => 1, 'issort' => 0]; 
         $result[] = ['name' => 'pannumber', 'value' => 'PANNUMBER', 'is_show' => 1, 'issort' => 0];
-        $result[] = ['name' => 'addeddate', 'value' => 'ADDEDDATE', 'is_show' => 1, 'issort' => 0]; 
+        $result[] = ['name' => 'created_at', 'value' => 'ADDEDDATE', 'is_show' => 1, 'issort' => 0]; 
         return $result;
     }
+    static function getrequest_Fund(){
+        $isshow =1; 
+        $result[] = ['name'=>'txnid','value'=>'Txn. ID','is_show'=>$isshow,'issort'=>0];
+        $result[] = ['name'=>'bankname','value'=>'Bank Name','is_show'=>$isshow,'issort'=>0];
+        $result[] = ['name'=>'image','value'=>'image','is_show'=>$isshow,'issort'=>0]; 
+        $result[] = ['name'=>'depositeddate','value'=>'DEPOSITE DATE','is_show'=>$isshow,'issort'=>0];
+        $result[] = ['name'=>'amount','value'=>'AMOUNT','is_show'=>$isshow,'issort'=>0];
+        $result[] = ['name'=>'addeddate','value'=>'Created At','is_show'=>$isshow,'issort'=>0]; 
+        $result[] = ['name'=>'acomment','value'=>'REMARKS','is_show'=>$isshow,'issort'=>0]; 
+        return $result;
+    }
+    static function txn_ledger_admin_header()
+    {
+        $isshow = 1;
+        $issort = 0; 
+        
+        $column[] = ['name' => 'txnid', 'value' => 'Transaction ID', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'created_at', 'value' => 'Date Time', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'narration', 'value' => 'Description', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'username', 'value' => 'User Id', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'opening', 'value' => 'Old', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'debit', 'value' => 'Debit', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'credit', 'value' => 'Credit', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'closing', 'value' => 'Current', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'remarks', 'value' => 'Remarks', 'is_show' => $isshow, 'issort' => 0]; 
+        return $column;
+     }  
 }

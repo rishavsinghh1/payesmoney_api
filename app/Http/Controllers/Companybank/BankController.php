@@ -24,7 +24,7 @@ class BankController extends Controller
 
     public function getlist(Request $request){
         $userdata = Auth::user();   
-        if(in_array($userdata->role,[1,2])){
+        if(in_array($userdata->role,[1,2,3,4])){
             try { 
                 $startdate     = trim(strip_tags($request->startdate));
                 $enddate       = trim(strip_tags($request->enddate)); 

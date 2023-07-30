@@ -155,7 +155,9 @@ class SuperDistController extends Controller
             $query = DB::table('users'); 
             $query->leftjoin('user_kyc_doc as ukd', 'ukd.userid', '=', 'users.id');
             $query->select('users.id','users.fullname','users.username','users.firmname','users.email'
-            ,'users.phone','users.altmobile','users.status','users.is_kyc','users.addeddate','users.minbalance','users.gstnumber','users.address','users.state','users.pincode','users.balance','users.cd_balance','users.role','users.pannumber','users.balance','users.cd_balance'
+            ,'users.phone','users.altmobile','users.status','users.is_kyc','users.addeddate','users.minbalance',
+            'users.gstnumber','users.address','users.state','users.pincode','users.balance',
+            'users.cd_balance','users.role','users.pannumber','users.balance','users.cd_balance','users.created_at'
                 );
           
 
@@ -199,8 +201,10 @@ class SuperDistController extends Controller
                     if($datum->status){
                         $data[$key]->status =   $datum->status; 
                     } 
-                    $dateTime = new DateTime($datum->addeddate, new DateTimeZone('Asia/Kolkata'));   
-                    $data[$key]->addeddate =   $dateTime->format("d-m-Y  g:i:s A"); 
+                    $dateTime = new DateTime($datum->created_at, new DateTimeZone('Asia/Kolkata'));  
+                    $data[$key]->created_at =   $dateTime->format("d-m-Y  g:i:s A"); 
+
+                   
                 }
                 return $this->response('success', ['message' => "Success.",'header' => $head, 'data' => $data,'recordsFiltered' => $recordsFiltered,'recordsTotal'=> $recordsTotal]); 
             }else{
