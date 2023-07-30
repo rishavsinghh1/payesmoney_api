@@ -559,9 +559,7 @@ class LoginController extends Controller
         $ciphertext_dec = substr($ciphertext_dec, $iv_size);
         $dc = openssl_decrypt($ciphertext_dec, 'AES-128-CBC', $key, OPENSSL_RAW_DATA, $iv_dec);
         return rtrim($dc, "\x00..\x1F");
-    }
-
-
+    } 
     public static function getUser(Request $request)
     {
         $data = User::all();
@@ -572,6 +570,7 @@ class LoginController extends Controller
     {
         $menu = array();
         $modulesPermission = ModulePermission::where('user_id', Auth::user()->id)->where('status', 1)->first();
+        
         if(Auth::user()->role == 1){
             $all_modules = Module::where('status',1)->get();
             $modules = array();
@@ -582,7 +581,7 @@ class LoginController extends Controller
             $modules = explode(",", $modulesPermission->module_id);
         }else{
             $modules = array();
-        }
+        } 
         if (empty($modules)) {
             $res = [
                 'message' => 'success',
@@ -590,7 +589,7 @@ class LoginController extends Controller
             ];
         }else{
             $menuPermissions = AdminMenuPermission::where('user_id', Auth::user()->id)->where('status', 1)->pluck('menu_id');
-       
+         
             $group_menu = AdminMenu::whereIn('id', $menuPermissions)->whereIn('module_id', $modules)->where('parent', 0)->orderBy('menu_order', 'ASC')->get()->toArray();
             $menufinal = array();
             if (!empty($group_menu)) {

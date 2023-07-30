@@ -57,8 +57,7 @@ class UserController extends Controller
     }
     public function getUser(Request $request)
     {
-        try {
-             
+        try {  
             $user = Auth::user(); 
             if($user){
                 return $this->response('success',['data' => $user, 'message' => 'Details fetched successfully!']);

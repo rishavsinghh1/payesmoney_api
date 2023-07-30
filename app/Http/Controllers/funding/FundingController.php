@@ -15,7 +15,9 @@ use App\Models\CompanyBank;
 use App\Models\CashTransaction;
 use Carbon\Carbon;
 use App\Models\UserPasswordDetails as UserPassword; 
-use App\Libraries\Fund; 
+use App\Libraries\Fund;   
+use DateTime;
+use DateTimeZone;
 class FundingController extends Controller
 {
     
@@ -281,7 +283,7 @@ class FundingController extends Controller
                 try {
                     $validated = Validator::make($request->all(), [
                         'userid'   => 'required', 
-                        "amount"      => 'required|numeric'  
+                        "amount"      => 'required|numeric|min:99'  
                         
                     ]);
                     if ($validated->fails()) {
@@ -362,6 +364,7 @@ class FundingController extends Controller
                      } 
                     $cr = $this->getFundById($request->id); 
                     $req = Fund::getrequest($request->id);  
+                    
                     if($req){
                     $remarks = $cr->referencenumber . "-" . $cr->requestremark. '-' .$request->remarks;
                     if (!empty($cr) && $cr->status == 2 && $request->status == "approved") { 
@@ -375,11 +378,12 @@ class FundingController extends Controller
                             "ttype" => 0,
                             "processby" => $userdata->id
                         );
-
+                       
                         if ($req['debitor']['cd_balance'] >= $req['request']['amount']) {
-
+                          
                         
                          $response = $this->approverequest($requestdata); 
+                         
                         if ($response['status']) {
                             $response = [
 
@@ -660,6 +664,101 @@ class FundingController extends Controller
                 
              } catch (\Throwable $th) {
                 return $this->response('internalservererror', ['message' => $th->getMessage()]); 
-        } 
+             } 
+    }
+
+
+    // ============================  User=====================//
+
+    public function Getrequest(Request $request){ 
+        try {   
+            $userdata = Auth::user(); 
+            if (in_array($userdata['role'], array(3))) {
+                $userid        =   $userdata['id'];
+                $startdate     = trim(strip_tags($request->startdate));
+                $enddate       = trim(strip_tags($request->enddate));
+                $searchvalue   = trim(strip_tags($request->searchvalue));
+                $start         = trim(strip_tags($request->start));
+                $status        = trim(strip_tags($request->status));
+                $length        = trim(strip_tags($request->length));
+                $order         = trim(strip_tags($request->order));
+                $orderby       = trim(strip_tags($request->orderby)); 
+                    $query = DB::table('creditrequest');
+                    $query->leftjoin('companybank', 'creditrequest.bankid', '=', 'companybank.id');
+                    $query->select('companybank.name as bankname', 'creditrequest.txnid', 'creditrequest.amount', 'creditrequest.depositeddate', 'creditrequest.created_at', 'creditrequest.status', 'creditrequest.requesttype', 'creditrequest.requestremark', 'creditrequest.id','creditrequest.image', 'creditrequest.comment', 'creditrequest.acomment', 'creditrequest.updated_at');
+                    $query->where(function ($q) use ($startdate, $enddate) {
+                        if (!empty($startdate) && !empty($enddate)) {
+                            $q->whereRaw("date(creditrequest.created_at) between '{$startdate}' and '{$enddate}'");
+                        }
+                        return $q;
+                    });
+                     $query->where('creditrequest.userid', $userid);
+
+                    if ($status != "" ) {
+                        $query->where('creditrequest.status',$status);
+                    }
+                    if ($searchvalue != "") {
+                        $query->where(function ($query) use ($searchvalue) {
+                            $query->where('creditrequest.amount', 'like',  trim($searchvalue) . '%')
+                                ->orwhere('creditrequest.txnid', 'like',  trim($searchvalue) . '%')
+                                ->orwhere('companybank.name', 'like', trim($searchvalue) . '%')
+                                ->orwhere('creditrequest.referencenumber', 'like', trim($searchvalue) . '%')
+                                ->orwhere('creditrequest.comment', 'like', '%' .  trim($searchvalue) . '%')
+                                ->orwhere('creditrequest.acomment', 'like',  trim($searchvalue) . '%');
+                        });
+                    }
+
+                    
+                    if ($order != "" && $orderby != "") {
+                        $query->orderBy($orderby, $order);
+                    } else {
+                        $query->orderBy("creditrequest.id", "desc");
+                    }
+                    $recordsTotal = $query->count();
+
+                    if (strtolower($length) == "all" && $start == 0) {
+                        $data = $query->get()->toArray();
+                        $recordsFiltered = $query->count();
+                    } else if ($length != "" && $start != "") {
+                        $data = $query->skip($start)->take($length)->get()->toArray();
+                        $recordsFiltered = count($data);
+                    } else {
+                        $data = $query->get()->toArray();
+                        $recordsFiltered = $query->count();
+                    }
+                    $totalamt =0;
+                    foreach($data as $key=>$datum){
+                    // if($datum->status){
+                    //     $data[$key]->status =   $this->status_array[$datum->status];
+                    // }
+                    
+                    $totalamt +=  $datum->amount;
+                    if($datum->status){
+                        $dateTime = new DateTime($datum->depositeddate, new DateTimeZone('Asia/Kolkata'));  
+                        
+                        $data[$key]->depositeddate =   $dateTime->format("d-m-Y"); 
+                       
+                    } 
+                }
+                    $head           = HEADERTrait::getrequest_Fund();
+                    $response = [
+                        'message' => "Success",
+                        'data'              => $data, 
+                        'header'            => $head,
+                        'recordsFiltered'   => $recordsFiltered,
+                        'recordsTotal'      => $recordsTotal,
+                        'totalamt'          =>$totalamt,
+                    ];
+                    return $this->response('success', $response);  
+            } else {
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "You Don't have permission to use this!"
+                ];
+                return $this->response('notvalid', $response);   
+            }
+         } catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]); 
+         } 
     }
 }
