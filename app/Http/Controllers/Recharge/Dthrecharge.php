@@ -11,13 +11,12 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Traits\HeaderTrait;
 use App\Http\Traits\ChargesTrait;
 use App\Http\Traits\RechargeTrait;
-use App\Libraries\Rechargelib;
-use App\Libraries\FundTrait;
+use App\Libraries\Rechargelib; 
 use App\Models\CashTransaction;
 use Illuminate\Support\Facades\Auth;
 class Dthrecharge extends Controller
 {
-    use CommonTrait,HeaderTrait,ChargesTrait,RechargeTrait,FundTrait;
+    use CommonTrait,HeaderTrait,ChargesTrait,RechargeTrait;
     public function __construct()
     {
         $this->status = ['0'=>'Deactive','1'=>'Active'];
