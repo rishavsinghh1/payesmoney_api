@@ -283,7 +283,7 @@ class FundingController extends Controller
                 try {
                     $validated = Validator::make($request->all(), [
                         'userid'   => 'required', 
-                        "amount"      => 'required|numeric|min:99'  
+                        "amount"      => 'required|numeric'   //'required|numeric|min:99'  
                         
                     ]);
                     if ($validated->fails()) {
