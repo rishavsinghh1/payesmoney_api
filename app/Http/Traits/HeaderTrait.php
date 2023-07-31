@@ -376,13 +376,14 @@ trait HeaderTrait
         $issort = 0; 
         
         $column[] = ['name' => 'txnid', 'value' => 'Transaction ID', 'is_show' => $isshow, 'issort' => $issort];
-        $column[] = ['name' => 'created_at', 'value' => 'Date Time', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'dateadded', 'value' => 'Date Time', 'is_show' => $isshow, 'issort' => 0];
         $column[] = ['name' => 'narration', 'value' => 'Description', 'is_show' => $isshow, 'issort' => 0];
-        $column[] = ['name' => 'username', 'value' => 'User Id', 'is_show' => $isshow, 'issort' => $issort];
-        $column[] = ['name' => 'opening', 'value' => 'Old', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'username', 'value' => 'User', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'cd_opening', 'value' => 'Old', 'is_show' => $isshow, 'issort' => 0];
         $column[] = ['name' => 'debit', 'value' => 'Debit', 'is_show' => $isshow, 'issort' => 0]; 
         $column[] = ['name' => 'credit', 'value' => 'Credit', 'is_show' => $isshow, 'issort' => 0]; 
-        $column[] = ['name' => 'closing', 'value' => 'Current', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'cd_closing', 'value' => 'Current', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'stype', 'value' => 'DEBIT ADMIN', 'is_show' => $isshow, 'issort' => 0];  
         $column[] = ['name' => 'remarks', 'value' => 'Remarks', 'is_show' => $isshow, 'issort' => 0]; 
         return $column;
      }  
