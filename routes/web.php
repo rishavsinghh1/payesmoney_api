@@ -15,6 +15,8 @@ $router->get('/', function () use ($router) {
     return $router->app->version();
 });
 $router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge');
+$router->get('superdistributor','ConfigurationController@superdistributor'); 
+$router->get('distributor','ConfigurationController@distributor'); 
 // $router->group(['middleware' => 'checkip'], function () use ($router) { 
     //auth routes
     $router->group(['prefix' => 'auth'], function () use ($router) {

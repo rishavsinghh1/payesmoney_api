@@ -62,6 +62,7 @@ class Dthrecharge extends Controller
                          ); 
                         if($userdata->cd_balance>=$amount) {
                             $requestdata =  RechargeTrait::process($ins_array);  
+                            //dd($requestdata);
                         if($requestdata['status']==1 && $requestdata['txnno']!=""){ 
                             $update_request = Recharge::where("id", $requestdata['orderid'])
                             ->update(["status" => 1]);  

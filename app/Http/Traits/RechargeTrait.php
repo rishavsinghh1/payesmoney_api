@@ -34,7 +34,7 @@ trait RechargeTrait
         $stmtData['uid']        =   $reqData['uid'];
         $stmtData['did']        =   $reqData['did']; 
         $stmtData['sdid']       =   $reqData['sdid'];
-        $stmtData['amount']     =   $reqData['amount'];
+        $stmtData['amount']     =   $reqData['amount'] - $reqData['comm'];
         $stmtData['addeddate']  =   date('Y-m-d'); 
         $stmtData['comm']     	=   $reqData['comm'];
         $stmtData['dcomm']      =   $reqData['dcomm']; 
@@ -149,10 +149,10 @@ trait RechargeTrait
         $query = DB::select(("SELECT SQL_NO_CACHE u.id, u.cd_balance, u.username,t.cd_closing from tbl_transaction_cashdeposit as t left JOIN tbl_users as u on t.uid=u.id where t.uid=".$req['uid']." and t.ttype in(".implode(",",$wttype).")  ORDER by t.id desc limit 1"));
         $u_data =  $query[0];
          $stmtData['cd_opening']   =   $u_data->cd_balance;
-         $stmtData['cd_closing']   =   round($stmtData['cd_opening'] + $agentcl , 1);
+         $stmtData['cd_closing']   =  ($stmtData['cd_opening'] + $agentcl);  
         if(count($query)!=0 ){
             if(self::roundval($u_data->cd_closing) == self::roundval($u_data->cd_balance)){
-                $balance = round($u_data->cd_balance + $agentcl, 1);
+                $balance =  $u_data->cd_balance + $agentcl;
                 $userupdate = ['cd_balance' => $balance];
                 $isupdate = User::where('id', $req['uid'])->update($userupdate);
                 if($isupdate){
