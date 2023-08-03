@@ -27,7 +27,7 @@ class Prepaidrecharge extends Controller
             $validated = Validator::make($request->all(), [ 
                 "operator"     => 'required|max:4|min:2',
                 "mobile"      => 'required|digits:10|numeric',
-                "amount"    => 'required||numeric|gt:0',
+                "amount"       => 'required|numeric|gt:0',
                 "referenceid"    => 'required',   
             ]);
             $userdata = Auth::user();
@@ -136,7 +136,7 @@ class Prepaidrecharge extends Controller
                                     $response = [
                                         'message' => "FAILED",
                                         'txnno'=>$requestdata['txnno'],
-                                        'operatorid'=>'',
+                                        'operatorid'=>$rs['data']['refTransactionNumber'],
                                         'operatorname'=>$operator->name,
                                         'mobile'=>$request->mobile
                                     ];
