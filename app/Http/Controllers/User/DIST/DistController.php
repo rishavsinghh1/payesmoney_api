@@ -203,14 +203,16 @@ class DistController extends Controller
                 $head           = HEADERTrait::SdHeader();
             }
             if(!empty($data)){
+                $totalamt =0;
                 foreach($data as $key=>$datum){   
+                    $totalamt +=  $datum->cd_balance;
                     if($datum->status){
                         $data[$key]->status =   $datum->status; 
                     } 
                     $dateTime = new DateTime($datum->created_at, new DateTimeZone('Asia/Kolkata'));  
                     $data[$key]->created_at =   $dateTime->format("d-m-Y  g:i:s A"); 
                 }
-                return $this->response('success', ['message' => "Success.",'header' => $head, 'data' => $data,'recordsFiltered' => $recordsFiltered,'recordsTotal'=> $recordsTotal]); 
+                return $this->response('success', ['message' => "Success.",'total_amt'=>$totalamt,'header' => $head, 'data' => $data,'recordsTotal'=> $recordsTotal]); 
             }else{
                 return $this->response('noresult', ['statuscode'=>200]); 
             }

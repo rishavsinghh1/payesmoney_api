@@ -183,13 +183,13 @@ class PayoutController extends Controller
                     //     $data[$key]->credits =   $datum->credit+$datum->commcredit;
                     // }
                     if($datum->status){
-                        $data[$key]->status =   $datum->status;
+                        $data[$key]->status =   $this->Stmtstatus[$datum->status];
                         $dateTime = new DateTime($datum->addeddate, new DateTimeZone('Asia/Kolkata'));  
                         $data[$key]->addeddate =   $dateTime->format("d-m-Y  g:i:s A"); 
 
                     } 
                 }
-                return $this->response('success', ['message' => "Success.",'header' => $head,'data' => $data,'recordsFiltered' => $recordsFiltered,'recordsTotal'=> $recordsTotal]); 
+                return $this->response('success', ['message' => "Success.",'header' => $head,'data' => $data,'recordsTotal'=> $recordsTotal]); 
             }else{
                 return $this->response('noresult', ['statuscode'=>200]); 
             }

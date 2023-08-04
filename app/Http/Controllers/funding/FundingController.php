@@ -283,7 +283,7 @@ class FundingController extends Controller
                 try {
                     $validated = Validator::make($request->all(), [
                         'userid'   => 'required', 
-                        "amount"      => 'required|numeric|min:99'  
+                        "amount"      => 'required|numeric'   //'required|numeric|min:99'  
                         
                     ]);
                     if ($validated->fails()) {
@@ -673,7 +673,7 @@ class FundingController extends Controller
     public function Getrequest(Request $request){ 
         try {   
             $userdata = Auth::user(); 
-            if (in_array($userdata['role'], array(3))) {
+            if (in_array($userdata['role'], array(3,4,5))) {
                 $userid        =   $userdata['id'];
                 $startdate     = trim(strip_tags($request->startdate));
                 $enddate       = trim(strip_tags($request->enddate));

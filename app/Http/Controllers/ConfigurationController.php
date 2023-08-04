@@ -22,7 +22,7 @@ class ConfigurationController extends Controller
     public function __construct()
     {
         //
-        $this->mindate      =   date('Y-m-d', strtotime(date('Y-m-d') . ' -1day'));
+          $this->mindate      =   date('Y-m-d', strtotime(date('Y-m-d') . ' -1day'));
         $this->today      = Carbon::now()->toDateString();
     }
 
@@ -55,10 +55,9 @@ class ConfigurationController extends Controller
         FROM `tbl_transaction_cashdeposit`
         where sdid is NOT null 
         and date_format(`dateadded`,'%Y-%m-%d') >= '".$this->mindate."' and  sdcomm > 0 GROUP BY sdid,ttype")); 
-        $totaldata = $query;  
-       // dd($totaldata);
+        $totaldata = $query;   
         foreach($totaldata  as  $val){
-            $commission  =  $val->credit - $val->debit;
+            $commission  =  $val->credit;
             $tds = 0;
             $netcomm = $commission - $tds;
             $reqData    =   array(
@@ -83,11 +82,9 @@ class ConfigurationController extends Controller
         FROM `tbl_transaction_cashdeposit`
         where did is NOT null 
         and date_format(`dateadded`,'%Y-%m-%d') >= '".$this->mindate."' and  dcomm > 0 GROUP BY did,ttype")); 
-        $totaldata = $query;  
-        dd($totaldata);
+        $totaldata = $query;   
         foreach($totaldata  as  $val){
-            $commission  =  $val->credit - $val->debit;
-
+            $commission  =  $val->credit; 
             $tds = 0;
             $netcomm = $commission - $tds;
             $reqData    =   array(
