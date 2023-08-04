@@ -77,81 +77,97 @@ class Dthrecharge extends Controller
                                 );
                                
                                $rs = Rechargelib::doDthrecharge($reqData);
-                               
-                               if($rs['statuscode']==0){
+                               if(isset($rs['statuscode'])){
+                                    if($rs['statuscode']==0){
+                                                $update_request = Recharge::where("id", $requestdata['orderid'])
+                                                ->update([
+                                                    "status" => 1,
+                                                    "operatorid"=>$rs['data']['refTransactionNumber'],
+                                                    'ackno'=>$rs['data']['refTransactionNumber']
+                                                ]); 
+                                            $response = [
+                                                'message' => "SUCCESS",
+                                                'txnno'=>$requestdata['txnno'],
+                                                'operatorid'=>$rs['data']['refTransactionNumber'],
+                                                'operatorname'=>$operator->name,
+                                                'mobile'=>$request->mobile
+                                            ];
+                                            return $this->response('success', $response);
+                                    }else if($rs['statuscode']==1){
+                                            $update_request = Recharge::where("id", $requestdata['orderid'])
+                                            ->update([
+                                                "status" => 1,
+                                                "operatorid"=>'PM'.rand(000000,11111),
+                                                'ackno'=>'PM'.rand(000000,11111),
+                                            ]); 
+                                        $response = [
+                                            'message' => "SUCCESS",
+                                            'txnno'=>$requestdata['txnno'],
+                                            'operatorid'=>'PM'.rand(000000,11111),
+                                            'operatorname'=>$operator->name,
+                                            'mobile'=>$request->mobile
+                                        ];
+                                        return $this->response('success', $response);
+                                    }else if($rs['statuscode']==2){
+                                        $post1['ttype'] = 0;
+                                        $post1['utype'] = 'credit';
+                                        $post1['comm']  = 0;
+                                        $post1['dcomm']  = 0;
+                                        $post1['sdcomm'] =0;
+                                        $post1['profit'] = 0;
+                                        $post1['uid'] = $userdata->id;
+                                        $post1['amount'] = $ins_array['amount'] - $charges['comm'];
+                                        $post1['narration'] = "Transaction FAILED for A/C ".$ins_array['canumber']." amount of ".$ins_array['amount']; 
+                                        $post1['creditamount'] =$ins_array['amount'] - $charges['comm'];
+                                        $rechcredit = RechargeTrait::credit($post1);
+                                        $txnupdate = [
+                                            'refundtxnid' => $rechcredit['txnno'],
+                                            'refunded' => 1,
+                                            'status' => 3, 
+                                            'daterefunded' => date('Y-m-d'),
+                                        ];
+                                        $isupdate = Recharge::where('id', $requestdata['orderid'])->update($txnupdate); 
+                                        $isupdatecash = CashTransaction::where('id', $requestdata['txnno'])->update(['refunded' => 1]);
+                                        $response = [
+                                            'message' => "FAILED",
+                                            'txnno'=>$requestdata['txnno'],
+                                            'operatorid'=>'',
+                                            'operatorname'=>$operator->name,
+                                            'mobile'=>$request->mobile
+                                        ];
+                                        return $this->response('notvalid', $response);
+                                    }else{
+                                            $update_request = Recharge::where("id", $requestdata['orderid'])
+                                            ->update([
+                                                "status" => 1,
+                                                "operatorid"=>'PM'.rand(000000,11111),
+                                                'ackno'=>'PM'.rand(000000,11111),
+                                            ]); 
+                                            $response = [
+                                                'message' => "SUCCESS",
+                                                'txnno'=>$requestdata['txnno'],
+                                                'operatorid'=>'PM'.rand(000000,11111),
+                                                'operatorname'=>$operator->name,
+                                                'mobile'=>$request->mobile
+                                            ];
+                                            return $this->response('success', $response);
+                                    }
+                                }else{
                                         $update_request = Recharge::where("id", $requestdata['orderid'])
-                                        ->update([
-                                            "status" => 1,
-                                            "operatorid"=>$rs['data']['refTransactionNumber'],
-                                            'ackno'=>$rs['data']['refTransactionNumber']
-                                        ]); 
-                                    $response = [
-                                        'message' => "SUCCESS",
-                                        'txnno'=>$requestdata['txnno'],
-                                        'operatorid'=>$rs['data']['refTransactionNumber'],
-                                        'operatorname'=>$operator->name,
-                                        'mobile'=>$request->mobile
-                                    ];
-                                    return $this->response('success', $response);
-                               }else if($rs['statuscode']==1){
-                                    $update_request = Recharge::where("id", $requestdata['orderid'])
-                                    ->update([
-                                        "status" => 1,
-                                        "operatorid"=>'PM'.rand(000000,11111),
-                                        'ackno'=>'PM'.rand(000000,11111),
-                                    ]); 
-                                $response = [
-                                    'message' => "SUCCESS",
-                                    'txnno'=>$requestdata['txnno'],
-                                    'operatorid'=>'PM'.rand(000000,11111),
-                                    'operatorname'=>$operator->name,
-                                    'mobile'=>$request->mobile
-                                ];
-                                return $this->response('success', $response);
-                               }else if($rs['statuscode']==2){
-                                $post1['ttype'] = 0;
-                                $post1['utype'] = 'credit';
-                                $post1['comm']  = 0;
-                                $post1['dcomm']  = 0;
-                                $post1['sdcomm'] =0;
-                                $post1['profit'] = 0;
-                                $post1['uid'] = $userdata->id;
-                                $post1['amount'] = $ins_array['amount'] - $charges['comm'];
-                                $post1['narration'] = "Transaction FAILED for A/C ".$ins_array['canumber']." amount of ".$ins_array['amount']; 
-                                $post1['creditamount'] =$ins_array['amount'] - $charges['comm'];
-                                $rechcredit = RechargeTrait::credit($post1);
-                                $txnupdate = [
-                                    'refundtxnid' => $rechcredit['txnno'],
-                                    'refunded' => 1,
-                                    'status' => 3, 
-                                    'daterefunded' => date('Y-m-d'),
-                                ];
-                                $isupdate = Recharge::where('id', $requestdata['orderid'])->update($txnupdate); 
-                                $isupdatecash = CashTransaction::where('id', $requestdata['txnno'])->update(['refunded' => 1]);
-                                $response = [
-                                    'message' => "FAILED",
-                                    'txnno'=>$requestdata['txnno'],
-                                    'operatorid'=>'',
-                                    'operatorname'=>$operator->name,
-                                    'mobile'=>$request->mobile
-                                ];
-                                return $this->response('notvalid', $response);
-                               }else{
-                                    $update_request = Recharge::where("id", $requestdata['orderid'])
-                                    ->update([
-                                        "status" => 1,
-                                        "operatorid"=>'PM'.rand(000000,11111),
-                                        'ackno'=>'PM'.rand(000000,11111),
-                                    ]); 
-                                    $response = [
-                                        'message' => "SUCCESS",
-                                        'txnno'=>$requestdata['txnno'],
-                                        'operatorid'=>'PM'.rand(000000,11111),
-                                        'operatorname'=>$operator->name,
-                                        'mobile'=>$request->mobile
-                                    ];
-                                    return $this->response('success', $response);
-                               }
+                                         ->update([
+                                             "status" => 1,
+                                             "operatorid"=>'PMN'.rand(000000,11111),
+                                             'ackno'=>'PMN'.rand(000000,11111),
+                                         ]); 
+                                         $response = [
+                                             'message' => "SUCCESS",
+                                             'txnno'=>$requestdata['txnno'],
+                                             'operatorid'=>'PMN'.rand(000000,11111),
+                                             'operatorname'=>$operator->name,
+                                             'mobile'=>$request->mobile
+                                         ];
+                                     return $this->response('success', $response); 
+                                     }
                             }else{
                                 $response = [
                                     'errors' => "invalid!",
