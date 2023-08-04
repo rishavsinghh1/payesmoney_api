@@ -197,7 +197,9 @@ class SuperDistController extends Controller
                 $head           = HEADERTrait::SdHeader();
             }
             if(!empty($data)){
+                $totalamt =0;
                 foreach($data as $key=>$datum){   
+                    $totalamt +=  $datum->cd_balance;  
                     if($datum->status){
                         $data[$key]->status =   $datum->status; 
                     } 
@@ -206,7 +208,7 @@ class SuperDistController extends Controller
 
                    
                 }
-                return $this->response('success', ['message' => "Success.",'header' => $head, 'data' => $data,'recordsFiltered' => $recordsFiltered,'recordsTotal'=> $recordsTotal]); 
+                return $this->response('success', ['message' => "Success.",'header' => $head,'total_amt'=>$totalamt, 'data' => $data,'recordsTotal'=> $recordsTotal]); 
             }else{
                 return $this->response('noresult', ['statuscode'=>200]); 
             }

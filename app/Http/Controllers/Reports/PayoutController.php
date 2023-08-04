@@ -189,7 +189,7 @@ class PayoutController extends Controller
 
                     } 
                 }
-                return $this->response('success', ['message' => "Success.",'header' => $head,'data' => $data,'recordsFiltered' => $recordsFiltered,'recordsTotal'=> $recordsTotal]); 
+                return $this->response('success', ['message' => "Success.",'header' => $head,'data' => $data,'recordsTotal'=> $recordsTotal]); 
             }else{
                 return $this->response('noresult', ['statuscode'=>200]); 
             }
