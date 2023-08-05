@@ -114,8 +114,14 @@ class SuperDistController extends Controller
                                     "user_id"=>$insertId,"menu_id"=>134,
                                     "user_id"=>$insertId,"menu_id"=>128,
                                 ];
-                                $moAdd  =[1,19,20,21];
-                        $dbinsrt = AdminMenuPermission::insert($addpermission);  
+                                for ($i = 1; $i < count($addpermission); $i++) {
+                                    $answers[] = [
+                                        'user_id' => $addpermission['user_id'],
+                                        'menu_id' => $addpermission['menu_id']
+                                         ];
+                                }
+                                $moAdd  =["user_id"=>$insertId,"module_id"=>"1,19,20,21"];
+                        $dbinsrt = AdminMenuPermission::insert($answers);  
                         $dbmod = ModulePermission::insert($moAdd);
                             $result = Config::where("id","11")->first();
                             $count = $result->value+1;
