@@ -116,6 +116,7 @@ class RetailerController extends Controller
                             $SdAdd = User::insert($requestdata);  
                             $insertId =DB::getPdo()->lastInsertId();
                             if($SdAdd){
+                                
                                 $result = Config::where("id","11")->first();
                                 $count = $result->value+1;
                                     Config::where('id',11)->update([
