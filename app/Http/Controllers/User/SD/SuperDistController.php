@@ -40,8 +40,7 @@ class SuperDistController extends Controller
                 "city"    => 'required',
                 "state"    => 'required',
                 "pincode"    => 'required',
-                "gender"    => 'required',
-                "accounts"    => 'required',  
+                "gender"    => 'required',   
 
             ]);
             if ($validated->fails()) {
