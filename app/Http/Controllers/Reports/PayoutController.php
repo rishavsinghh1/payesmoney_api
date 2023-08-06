@@ -190,6 +190,7 @@ class PayoutController extends Controller
                     } 
                 }
                 return $this->response('success', ['message' => "Success.",'header' => $head,'data' => $data,'recordsTotal'=> $recordsTotal]); 
+            
             }else{
                 return $this->response('noresult', ['statuscode'=>200]); 
             }
@@ -324,5 +325,124 @@ class PayoutController extends Controller
             }else{
                 return $this->response('noresult', ['statuscode'=>200]); 
             }
+    }
+
+
+
+    public function dayledger(Request $request)
+    {
+        DB::statement("SET SQL_MODE=''");
+        $startdate     = trim(strip_tags($request->startdate));
+        $enddate       = trim(strip_tags($request->enddate)); 
+        $length        = trim(strip_tags($request->length));
+        $userid        = trim(strip_tags($request->userid));
+        $status       = trim(strip_tags($request->status)); 
+        $start = empty($startdate)? $this->today:$startdate;
+        $end   = empty($enddate)? $this->today:$enddate;
+        $status   = empty($status)? 1:$status;
+         
+        $userdata = Auth::user();
+        $query = DB::table('recharge'); 
+        if($userdata->role == 1){
+            $userid =  $userdata->id;
+            if($status == 1){
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,SUM(tbl_recharge.comm) as totalcomm,SUM(tbl_recharge.amount)-SUM(tbl_recharge.comm) as salemcomm,ROUND(SUM(tbl_recharge.comm)/SUM(tbl_recharge.amount)*100,2) as RCOMM,ROUND(SUM(tbl_recharge.dcomm)/SUM(tbl_recharge.amount)*100,2) as DCOMM,ROUND(SUM(tbl_recharge.sdcomm)/SUM(tbl_recharge.amount)*100,2) as SDCOMM,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }elseif($status == 2){ 
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }else{
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }
+            $query->where('transaction_cashdeposit.sid',$userid);
+        }elseif($userdata->role == 3){
+            $userid =  $userdata->id;
+            if($status == 1){
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,SUM(tbl_recharge.comm) as totalcomm,SUM(tbl_recharge.amount)-SUM(tbl_recharge.comm) as salemcomm,ROUND(SUM(tbl_recharge.comm)/SUM(tbl_recharge.amount)*100,2) as RCOMM,ROUND(SUM(tbl_recharge.dcomm)/SUM(tbl_recharge.amount)*100,2) as DCOMM,ROUND(SUM(tbl_recharge.sdcomm)/SUM(tbl_recharge.amount)*100,2) as SDCOMM,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }elseif($status == 2){ 
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }else{
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }
+            $query->where('transaction_cashdeposit.sid',$userid);
+        }elseif($userdata->role == 4){
+            $userid =  $userdata->id;
+            if($status == 1){
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,SUM(tbl_recharge.comm) as totalcomm,SUM(tbl_recharge.amount)-SUM(tbl_recharge.comm) as salemcomm,ROUND(SUM(tbl_recharge.comm)/SUM(tbl_recharge.amount)*100,2) as RCOMM,ROUND(SUM(tbl_recharge.dcomm)/SUM(tbl_recharge.amount)*100,2) as DCOMM,ROUND(SUM(tbl_recharge.sdcomm)/SUM(tbl_recharge.amount)*100,2) as SDCOMM,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }elseif($status == 2){ 
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }else{
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }
+            $query->where('transaction_cashdeposit.sid',$userid);
+        }elseif($userdata->role == 5){
+            $userid =  $userdata->id;
+            if($status == 1){
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,SUM(tbl_recharge.comm) as totalcomm,SUM(tbl_recharge.amount)-SUM(tbl_recharge.comm) as salemcomm,ROUND(SUM(tbl_recharge.comm)/SUM(tbl_recharge.amount)*100,2) as RCOMM,ROUND(SUM(tbl_recharge.dcomm)/SUM(tbl_recharge.amount)*100,2) as DCOMM,ROUND(SUM(tbl_recharge.sdcomm)/SUM(tbl_recharge.amount)*100,2) as SDCOMM,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }elseif($status == 2){ 
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }else{
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+            }
+            $query->where('transaction_cashdeposit.sid',$userid);
+        }
+        
+        $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.id', '=', 'recharge.txnid'); 
+        $query->select($request);   
+
+        $query->whereDate('recharge.addeddate', '>=', $startdate);
+        $query->whereDate('recharge.addeddate', '<=', $enddate); 
+ 
+            // if($status == 1){
+            // $query->select(DB::raw('SUM(rech.amount) as totalsale,COUNT(rech.id) as totalcount,SUM(rech.comm) as totalcomm,SUM(rech.amount)-SUM(rech.comm) as salemcomm,ROUND(SUM(rech.comm)/SUM(rech.amount)*100,2) as commission') ,'rech.operatorname as opname','rech.addeddate as date');
+            // }elseif($status == 2){ 
+            // $query->select(DB::raw("SUM(rech.amount) as totalsale,COUNT(rech.id) as totalcount") ,'rech.operatorname as opname','addeddate as date');
+            // }else{
+            // $query->select(DB::raw("SUM(rech.amount) as totalsale,COUNT(rech.id) as totalcount") ,'rech.operatorname as opname','addeddate as date');
+            // }
+            // if ($startdate != "" || $enddate   != "") {
+            //     $query->whereRaw("date('rech.addeddate') between '{$startdate}' and '{$enddate}'");
+            //     //$query->whereDate('addeddate', '>=', $startdate);
+            // }
+            $query->where('recharge.status',$status);
+
+             
+             $query->groupBy('operatorname');  
+             $query->orderByRaw('COUNT("recharge.id") DESC');
+             $recordsTotal = $query->count();
+
+            $data = $query->get()->toArray();
+           // dd($data);
+            if($userdata->role == 1){
+                $head           = HEADERTrait::txn_S_Daybook_header();
+            }else if($$userdata->role == 3){
+                $head           = HEADERTrait::txn_S_Daybook_header();
+            }else if($userdata->role == 4){
+                $head           = HEADERTrait::txn_S_Daybook_header();
+            }else if($userdata->role == 5){
+                $head           = HEADERTrait::txn_S_Daybook_header();
+            } 
+            if (!empty($data)) {
+                $totalcount=0;
+                $totalsale=0;
+                $totalsalemcomm=0;
+                $totalcommission=0; 
+                foreach($data as $key=>$datum){  
+                    $totalcount +=  $datum->totalcount;
+                    $totalsale +=  $datum->totalsale;
+                            if($status == 1){
+                            $totalsalemcomm +=  $datum->salemcomm;
+                            $totalcommission +=  $datum->totalcomm;
+                            }  
+                        $dateTime = new DateTime($datum->date, new DateTimeZone('Asia/Kolkata'));  
+                        $data[$key]->date =   $dateTime->format("d-m-Y  g:i:s A");  
+                }
+                return $this->response('success', ['message' => "Success.",'header' => $head,
+                'data' => $data,
+                'recordsTotal'=> $recordsTotal,
+                'total' => ['totalcount'=>$totalcount,'totalsale'=>$totalsale,'totalsalemcomm'=>$totalsalemcomm,'totalcommission'=>$totalcommission],
+            ]); 
+            
+            } else {
+                return $this->response('noresult', ['statuscode'=>200]); 
+            } 
     }
 }

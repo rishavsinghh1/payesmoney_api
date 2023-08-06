@@ -387,4 +387,17 @@ trait HeaderTrait
         $column[] = ['name' => 'remarks', 'value' => 'Remarks', 'is_show' => $isshow, 'issort' => 0]; 
         return $column;
      }  
+
+     static function txn_S_Daybook_header()
+     {
+         $isshow = 1;
+         $issort = 0;  
+         $result[] = ['name'=>'opname','value'=>'OPNAME','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'totalcount','value'=>'COUNT','is_show'=>$isshow,'issort'=>0]; 
+         $result[] = ['name'=>'totalsale','value'=>'SALE','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'totalcomm','value'=>'COMMISSION','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'salemcomm','value'=>'SALE(-)COMMISSION','is_show'=>$isshow,'issort'=>0];    
+         return $result;
+      } 
+
 }
