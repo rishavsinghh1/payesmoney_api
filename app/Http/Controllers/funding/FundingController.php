@@ -294,6 +294,7 @@ class FundingController extends Controller
                     $requestdata["debitor"] = $userdata->id;
                     $requestdata["amount"] = $request->amount;
                     $requestdata["status"] = 2;
+                    $requestdata["bankid"] = 7; 
                     $requestdata["requesttype"] = 5;
                     $requestdata["addeddate"] =  date('Y-m-d');
                     $requestdata["depositeddate"] =  date('Y-m-d'); 

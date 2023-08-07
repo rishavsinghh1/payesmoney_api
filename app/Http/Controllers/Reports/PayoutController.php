@@ -241,11 +241,22 @@ class PayoutController extends Controller
             $query->where('transaction_cashdeposit.sdid',$userid);
         }elseif($userdata->role == 4){
             $userid =  $userdata->id;
-            $request=  ['transaction_cashdeposit.id','users.username','transaction_cashdeposit.cd_opening','transaction_cashdeposit.amount','transaction_cashdeposit.dcomm',
-            'transaction_cashdeposit.gst','transaction_cashdeposit.tds','transaction_cashdeposit.cd_closing',
-            'transaction_cashdeposit.dtype','transaction_cashdeposit.narration','transaction_cashdeposit.remarks'
-            ,'transaction_cashdeposit.ttype','transaction_cashdeposit.dateadded','transaction_cashdeposit.customercharge',
-            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 6 THEN tbl_transaction_cashdeposit.amount END) AS debit'),DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 0 THEN tbl_transaction_cashdeposit.amount END) AS credit')];
+            $request=  ['transaction_cashdeposit.id',
+            'users.username','transaction_cashdeposit.dopening as cd_opening',
+            'transaction_cashdeposit.amount',
+            'transaction_cashdeposit.dcomm',
+            'transaction_cashdeposit.gst',
+            'transaction_cashdeposit.tds',
+            'transaction_cashdeposit.dclosing as cd_closing',
+            'transaction_cashdeposit.dtype',
+            'transaction_cashdeposit.narration',
+            'transaction_cashdeposit.remarks',
+            'transaction_cashdeposit.ttype',
+            'transaction_cashdeposit.utype', 
+            'transaction_cashdeposit.dateadded',
+            'transaction_cashdeposit.customercharge',
+            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.dtype= "debit" THEN tbl_transaction_cashdeposit.amount END) AS debit'),
+            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.dtype= "credit" THEN tbl_transaction_cashdeposit.amount END) AS credit')];
             $query->where('transaction_cashdeposit.did',$userid);
         } 
         elseif($userdata->role == 5){
@@ -290,18 +301,18 @@ class PayoutController extends Controller
                 $recordsFiltered = $query->count();
             }
             
-            $head           = HEADERTrait::txn_ledger_admin_header();
+            
 
-           // dd($data);
-            //  if($request->user()->role == 1 || $request->user()->role == 1){
-            //     $head           = HEADERTrait::txn_ledger_admin_header();
-            // }else if($request->user()->role == 3){
-            //     $head           = HEADERTrait::txn_ledger_admin_header();
-            // }else if($request->user()->role == 4){
-            //     $head           = HEADERTrait::txn_ledger_admin_header();
-            // }else{
-            //     $head           = HEADERTrait::txn_ledger_admin_header();
-            // }
+          
+             if($userdata->role == 1){
+                $head           = HEADERTrait::txn_ledger_admin_header();
+            }else if($userdata->role == 3){
+                $head           = HEADERTrait::txn_ledger_admin_header();
+            }else if($userdata->role == 4){
+                $head           = HEADERTrait::txn_ledger_DIST_header();
+            }else{
+                $head           = HEADERTrait::txn_ledger_admin_header();
+            }
             
             if(!empty($data)){
                
@@ -402,15 +413,13 @@ class PayoutController extends Controller
             //     $query->whereRaw("date('rech.addeddate') between '{$startdate}' and '{$enddate}'");
             //     //$query->whereDate('addeddate', '>=', $startdate);
             // }
-            $query->where('recharge.status',$status);
-
-             
+            $query->where('recharge.status',$status); 
              $query->groupBy('operatorname');  
              $query->orderByRaw('COUNT("recharge.id") DESC');
              $recordsTotal = $query->count();
 
             $data = $query->get()->toArray();
-           // dd($data);
+            dd($data);
             if($userdata->role == 1){
                 $head           = HEADERTrait::txn_S_Daybook_header();
             }else if($$userdata->role == 3){
@@ -429,8 +438,8 @@ class PayoutController extends Controller
                     $totalcount +=  $datum->totalcount;
                     $totalsale +=  $datum->totalsale;
                             if($status == 1){
-                            $totalsalemcomm +=  $datum->salemcomm;
-                            $totalcommission +=  $datum->totalcomm;
+                                $totalsalemcomm +=  $datum->salemcomm;
+                                $totalcommission +=  $datum->totalcomm;
                             }  
                         $dateTime = new DateTime($datum->date, new DateTimeZone('Asia/Kolkata'));  
                         $data[$key]->date =   $dateTime->format("d-m-Y  g:i:s A");  
