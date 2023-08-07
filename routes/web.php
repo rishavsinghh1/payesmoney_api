@@ -154,7 +154,8 @@ $router->get('distributor','ConfigurationController@distributor');
             $router->post('getoperator', 'Recharge\Prepaidrecharge@getoperator'); 
             $router->post('getRoffer', 'Recharge\Prepaidrecharge@getRoffer');
             $router->post('getDthDetails', 'Recharge\Prepaidrecharge@getDthDetails');
-           
+            $router->post('dayledger', 'Reports\PayoutController@dayledger'); 
+            
             
              
             

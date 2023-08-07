@@ -387,4 +387,34 @@ trait HeaderTrait
         $column[] = ['name' => 'remarks', 'value' => 'Remarks', 'is_show' => $isshow, 'issort' => 0]; 
         return $column;
      }  
+
+     static function txn_S_Daybook_header()
+     {
+         $isshow = 1;
+         $issort = 0;  
+         $result[] = ['name'=>'opname','value'=>'OPNAME','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'totalcount','value'=>'COUNT','is_show'=>$isshow,'issort'=>0]; 
+         $result[] = ['name'=>'totalsale','value'=>'SALE','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'totalcomm','value'=>'COMMISSION','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'salemcomm','value'=>'SALE(-)COMMISSION','is_show'=>$isshow,'issort'=>0];    
+         return $result;
+      } 
+    
+    static function txn_ledger_DIST_header()
+    {
+        $isshow = 1;
+        $issort = 0; 
+        
+        $column[] = ['name' => 'txnid', 'value' => 'Transaction ID', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'dateadded', 'value' => 'Date Time', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'narration', 'value' => 'Description', 'is_show' => $isshow, 'issort' => 0];
+        // $column[] = ['name' => 'username', 'value' => 'User', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'cd_opening', 'value' => 'Old', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'debit', 'value' => 'Debit', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'credit', 'value' => 'Credit', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'cd_closing', 'value' => 'Current', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'dtype', 'value' => 'DEBIT/CREDIT', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'remarks', 'value' => 'Remarks', 'is_show' => $isshow, 'issort' => 0]; 
+        return $column;
+     }  
 }

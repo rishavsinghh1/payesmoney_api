@@ -16,6 +16,8 @@ use App\Models\UserPasswordDetails as UserPassword;
 use DateTime;
 use DateTimeZone;
 use Carbon\Carbon;
+use App\Models\AdminMenuPermission;
+use App\Models\ModulePermission;
 class SuperDistController extends Controller
 {
     use CommonTrait,HeaderTrait;
@@ -38,8 +40,7 @@ class SuperDistController extends Controller
                 "city"    => 'required',
                 "state"    => 'required',
                 "pincode"    => 'required',
-                "gender"    => 'required',
-                "accounts"    => 'required',  
+                "gender"    => 'required',   
 
             ]);
             if ($validated->fails()) {
@@ -101,6 +102,38 @@ class SuperDistController extends Controller
                         $insertId =DB::getPdo()->lastInsertId();
                          
                         if($SdAdd){
+                            DB::table('admin_menu_permissions')->insert([
+                                    ["user_id"=>$insertId,"menu_id"=>15],
+                                    ["user_id"=>$insertId,"menu_id"=>116],
+                                    ["user_id"=>$insertId,"menu_id"=>122],
+                                    ["user_id"=>$insertId,"menu_id"=>123],
+                                    ["user_id"=>$insertId,"menu_id"=>127],
+                                    ["user_id"=>$insertId,"menu_id"=>124],
+                                    ["user_id"=>$insertId,"menu_id"=>132],
+                                    ["user_id"=>$insertId,"menu_id"=>133],
+                                    ["user_id"=>$insertId,"menu_id"=>134],
+                                    ["user_id"=>$insertId,"menu_id"=>128]
+                            ]);
+                                // $addpermission = [
+                                //     ["user_id"=>$insertId,"menu_id"=>15],
+                                //     ["user_id"=>$insertId,"menu_id"=>116],
+                                //     ["user_id"=>$insertId,"menu_id"=>122],
+                                //     ["user_id"=>$insertId,"menu_id"=>123],
+                                //     ["user_id"=>$insertId,"menu_id"=>127],
+                                //     ["user_id"=>$insertId,"menu_id"=>124],
+                                //     ["user_id"=>$insertId,"menu_id"=>132],
+                                //     ["user_id"=>$insertId,"menu_id"=>133],
+                                //     ["user_id"=>$insertId,"menu_id"=>134],
+                                //     ["user_id"=>$insertId,"menu_id"=>128],
+                                // ]; 
+                                // $new_insert_array=array();
+                                // foreach($addpermission as $key=>$val)
+                                // {
+                                //     $new_insert_array[]=array('user_id'=>$val['user_id'],'menu_id'=>$val['menu_id']);
+                                // }
+                                // AdminMenuPermission::insert($new_insert_array);
+                        $moAdd  =["user_id"=>$insertId,"module_id"=>"1,19,20,21"]; 
+                        $dbmod = ModulePermission::insert($moAdd);
                             $result = Config::where("id","11")->first();
                             $count = $result->value+1;
                                 Config::where('id',11)->update([
