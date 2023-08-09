@@ -224,21 +224,29 @@ class PayoutController extends Controller
         $userid       = trim(strip_tags($request->userid));
         $search        = trim(strip_tags($request->search));
         if(empty($startdate) && empty($enddate)){
-            $startdate = date('Y-m-d', strtotime("-30 days"));
+            $startdate = date('Y-m-d');
             $enddate   = $this->today;  
         }
         $userdata = Auth::user();
-        $query = DB::table('users'); 
+        $query = DB::table('users');  
         if($userdata->role == 1){
             $userid =  $userdata->id;
-            $request=  ['transaction_cashdeposit.id','users.username','transaction_cashdeposit.cd_opening','transaction_cashdeposit.amount','transaction_cashdeposit.comm','transaction_cashdeposit.dcomm','transaction_cashdeposit.sdcomm','transaction_cashdeposit.tds','transaction_cashdeposit.cd_closing','transaction_cashdeposit.stype','transaction_cashdeposit.narration','transaction_cashdeposit.remarks','transaction_cashdeposit.ttype',
-            'transaction_cashdeposit.dateadded','transaction_cashdeposit.customercharge',DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 6 THEN tbl_transaction_cashdeposit.amount END) AS debit'),DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 0 THEN tbl_transaction_cashdeposit.amount END) AS credit')];
-            $query->where('transaction_cashdeposit.sid',$userid);
+            $request=  ['transaction_cashdeposit.id','users.username','transaction_cashdeposit.sopening as cd_opening','transaction_cashdeposit.amount','transaction_cashdeposit.comm','transaction_cashdeposit.dcomm','transaction_cashdeposit.sdcomm','transaction_cashdeposit.tds','transaction_cashdeposit.sclosing as cd_closing','transaction_cashdeposit.stype','transaction_cashdeposit.narration',
+                'transaction_cashdeposit.remarks','transaction_cashdeposit.ttype','transaction_cashdeposit.dateadded','transaction_cashdeposit.customercharge',
+                DB::raw('(CASE WHEN tbl_transaction_cashdeposit.stype="debit" THEN tbl_transaction_cashdeposit.amount END) AS debit'),
+                DB::raw('(CASE WHEN tbl_transaction_cashdeposit.stype="credit" THEN tbl_transaction_cashdeposit.amount END) AS credit')
+            ];
+            $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.sid', '=', 'users.id');
+            $query->where('transaction_cashdeposit.ttype','<>',6);
         }elseif($userdata->role == 3){
             $userid =  $userdata->id;
-            $request=  ['transaction_cashdeposit.id','users.username','transaction_cashdeposit.cd_opening','transaction_cashdeposit.amount','transaction_cashdeposit.sdcomm','transaction_cashdeposit.gst','transaction_cashdeposit.tds','transaction_cashdeposit.cd_closing','transaction_cashdeposit.sdtype','transaction_cashdeposit.narration','transaction_cashdeposit.remarks','transaction_cashdeposit.ttype','transaction_cashdeposit.dateadded',
-            'transaction_cashdeposit.customercharge',DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 6 THEN tbl_transaction_cashdeposit.amount END) AS debit'),DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 0 THEN tbl_transaction_cashdeposit.amount END) AS credit')];
+            $request=  ['transaction_cashdeposit.id','users.username','transaction_cashdeposit.sdopening as cd_opening','transaction_cashdeposit.amount','transaction_cashdeposit.sdcomm','transaction_cashdeposit.gst','transaction_cashdeposit.tds','transaction_cashdeposit.sdclosing as cd_closing','transaction_cashdeposit.sdtype','transaction_cashdeposit.narration','transaction_cashdeposit.remarks','transaction_cashdeposit.ttype','transaction_cashdeposit.dateadded',
+            'transaction_cashdeposit.customercharge',
+            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.sdtype="debit" THEN tbl_transaction_cashdeposit.amount END) AS debit'),
+            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.sdtype="credit" THEN tbl_transaction_cashdeposit.amount END) AS credit')];
             $query->where('transaction_cashdeposit.sdid',$userid);
+            $query->where('transaction_cashdeposit.ttype','<>',6);
+            $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.sdid', '=', 'users.id');
         }elseif($userdata->role == 4){
             $userid =  $userdata->id;
             $request=  ['transaction_cashdeposit.id',
@@ -255,9 +263,11 @@ class PayoutController extends Controller
             'transaction_cashdeposit.utype', 
             'transaction_cashdeposit.dateadded',
             'transaction_cashdeposit.customercharge',
-            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.dtype= "debit" THEN tbl_transaction_cashdeposit.amount END) AS debit'),
-            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.dtype= "credit" THEN tbl_transaction_cashdeposit.amount END) AS credit')];
+             DB::raw('(CASE WHEN tbl_transaction_cashdeposit.dtype="debit" THEN tbl_transaction_cashdeposit.amount END) AS debit'),
+            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.dtype="credit" THEN tbl_transaction_cashdeposit.amount END) AS credit')];
             $query->where('transaction_cashdeposit.did',$userid);
+            $query->where('transaction_cashdeposit.ttype','<>',6);
+            $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.did', '=', 'users.id');
         } 
         elseif($userdata->role == 5){
             $userid =  $userdata->id;
@@ -266,14 +276,12 @@ class PayoutController extends Controller
             'transaction_cashdeposit.customercharge',
             DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 6 THEN tbl_transaction_cashdeposit.amount END) AS debit'),DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 0 THEN tbl_transaction_cashdeposit.amount END) AS credit')];
             $query->where('transaction_cashdeposit.uid',$userid);
+            $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.uid', '=', 'users.id');
         } 
           
-       $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.uid', '=', 'users.id'); 
-       $query->select($request);  
-       
-               
-       $query->whereDate('transaction_cashdeposit.addeddate', '>=', $startdate);
-       $query->whereDate('transaction_cashdeposit.addeddate', '<=', $enddate); 
+        
+        $query->select($request);  
+        $query->whereBetween('transaction_cashdeposit.addeddate', [$startdate, $enddate]);  
             if($order != ""){
                 $query->orderBy('transaction_cashdeposit.id', $order);
                 
@@ -287,11 +295,7 @@ class PayoutController extends Controller
                         $q->orWhere('transaction_cashdeposit.amount', 'LIKE', "%{$search}%");  
                     }
                     return $q;
-                });
-            
-           
-             
-             
+                }); 
             $recordsTotal = $query->count(); 
             if ($length != "" && $start !="") {
                 $data = $query->skip($start)->take($length)->get()->toArray();
@@ -299,12 +303,8 @@ class PayoutController extends Controller
             }else{
                 $data = $query->get()->toArray();
                 $recordsFiltered = $query->count();
-            }
-            
-            
-
-          
-             if($userdata->role == 1){
+            } 
+            if($userdata->role == 1){
                 $head           = HEADERTrait::txn_ledger_admin_header();
             }else if($userdata->role == 3){
                 $head           = HEADERTrait::txn_ledger_admin_header();
@@ -435,9 +435,9 @@ class PayoutController extends Controller
                 $totalsalemcomm=0;
                 $totalcommission=0; 
                 foreach($data as $key=>$datum){  
-                    $totalcount +=  $datum->totalcount;
-                    $totalsale +=  $datum->totalsale;
-                            if($status == 1){
+                        $totalcount +=  $datum->totalcount;
+                        $totalsale +=  $datum->totalsale;
+                        if($status == 1){
                                 $totalsalemcomm +=  $datum->salemcomm;
                                 $totalcommission +=  $datum->totalcomm;
                             }  
