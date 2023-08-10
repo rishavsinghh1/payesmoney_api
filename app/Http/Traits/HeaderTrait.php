@@ -342,23 +342,62 @@ trait HeaderTrait
         $column[] = ['name' => 'orderid', 'value' => 'ORDER ID', 'is_show' => $isshow, 'issort' => 0];  
         return $column;
     } 
-
-
     static function SdHeader()
     {
-        $isshow = 1;
+         $isshow = 1;
         $issort = 1;
-        $result[] = ['name' => 'fullname', 'value' => 'NAME', 'is_show' => 1, 'issort' => 0];
-        $result[] = ['name' => 'username', 'value' => 'USERNAME', 'is_show' => 1, 'issort' => 0];
-        $result[] = ['name' => 'email', 'value' => 'EMAIL', 'is_show' => 1, 'issort' => 0];
+        $result[] = ['name' => 'firmname', 'value' => 'FIRMNAME', 'is_show' => 1, 'issort' => 0];
+        $result[] = ['name' => 'username', 'value' => 'USERNAME', 'is_show' => 1, 'issort' => 0]; 
         $result[] = ['name' => 'phone', 'value' => 'PHONE', 'is_show' => 1, 'issort' => 0]; 
         $result[] = ['name' => 'cd_balance', 'value' => 'BALANCE', 'is_show' => 1, 'issort' => 0]; 
         // $result[] = ['name' => 'status', 'value' => 'STATUS', 'is_show' => 1, 'issort' => 0];
-        // $result[] = ['name' => 'is_kyc', 'value' => 'KYC STATUS', 'is_show' => 1, 'issort' => 0]; 
-        $result[] = ['name' => 'pannumber', 'value' => 'PANNUMBER', 'is_show' => 1, 'issort' => 0];
+        // $result[] = ['name' => 'is_kyc', 'value' => 'KYC STATUS', 'is_show' => 1, 'issort' => 0];  
         $result[] = ['name' => 'created_at', 'value' => 'ADDEDDATE', 'is_show' => 1, 'issort' => 0]; 
         return $result;
     }
+    static function RAdminHeader()
+    {
+        $isshow = 1;
+        $issort = 1;
+        $result[] = ['name' => 'firmname', 'value' => 'FIRMNAME', 'is_show' => 1, 'issort' => 0];
+        $result[] = ['name' => 'fullname', 'value' => 'NAME', 'is_show' => 1, 'issort' => 0];
+        $result[] = ['name' => 'username', 'value' => 'USERNAME', 'is_show' => 1, 'issort' => 0]; 
+        $result[] = ['name' => 'phone', 'value' => 'PHONE', 'is_show' => 1, 'issort' => 0]; 
+        $result[] = ['name' => 'cd_balance', 'value' => 'BALANCE', 'is_show' => 1, 'issort' => 0]; 
+        
+        // $result[] = ['name' => 'status', 'value' => 'STATUS', 'is_show' => 1, 'issort' => 0];
+        // $result[] = ['name' => 'is_kyc', 'value' => 'KYC STATUS', 'is_show' => 1, 'issort' => 0];  
+        $result[] = ['name' => 'created_at', 'value' => 'ADDEDDATE', 'is_show' => 1, 'issort' => 0]; 
+        return $result;
+    }
+    static function RRTHeader()
+    {
+        $isshow = 1;
+        $issort = 1;
+        $result[] = ['name' => 'firmname', 'value' => 'FIRMNAME', 'is_show' => 1, 'issort' => 0];
+        $result[] = ['name' => 'username', 'value' => 'USERNAME', 'is_show' => 1, 'issort' => 0]; 
+        $result[] = ['name' => 'phone', 'value' => 'PHONE', 'is_show' => 1, 'issort' => 0]; 
+        $result[] = ['name' => 'cd_balance', 'value' => 'BALANCE', 'is_show' => 1, 'issort' => 0]; 
+        // $result[] = ['name' => 'status', 'value' => 'STATUS', 'is_show' => 1, 'issort' => 0];
+        // $result[] = ['name' => 'is_kyc', 'value' => 'KYC STATUS', 'is_show' => 1, 'issort' => 0];  
+        $result[] = ['name' => 'created_at', 'value' => 'ADDEDDATE', 'is_show' => 1, 'issort' => 0]; 
+        return $result;
+    }
+    static function distHeader()
+    {
+        $isshow = 1;
+        $issort = 1;
+        $result[] = ['name' => 'firmname', 'value' => 'FIRMNAME', 'is_show' => 1, 'issort' => 0];
+        $result[] = ['name' => 'username', 'value' => 'USERNAME', 'is_show' => 1, 'issort' => 0]; 
+        $result[] = ['name' => 'phone', 'value' => 'PHONE', 'is_show' => 1, 'issort' => 0]; 
+        $result[] = ['name' => 'cd_balance', 'value' => 'BALANCE', 'is_show' => 1, 'issort' => 0]; 
+        // $result[] = ['name' => 'status', 'value' => 'STATUS', 'is_show' => 1, 'issort' => 0];
+        // $result[] = ['name' => 'is_kyc', 'value' => 'KYC STATUS', 'is_show' => 1, 'issort' => 0];  
+        $result[] = ['name' => 'created_at', 'value' => 'ADDEDDATE', 'is_show' => 1, 'issort' => 0]; 
+        return $result;
+    }
+    
+     
     static function getrequest_Fund(){
         $isshow =1; 
         $result[] = ['name'=>'txnid','value'=>'Txn. ID','is_show'=>$isshow,'issort'=>0];
@@ -395,10 +434,53 @@ trait HeaderTrait
          $result[] = ['name'=>'opname','value'=>'OPNAME','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'totalcount','value'=>'COUNT','is_show'=>$isshow,'issort'=>0]; 
          $result[] = ['name'=>'totalsale','value'=>'SALE','is_show'=>$isshow,'issort'=>0];
-         $result[] = ['name'=>'totalcomm','value'=>'COMMISSION','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'RTCOMM','value'=>'RT COMM','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'DISTCOMM','value'=>'DIST COMM','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'SDCOMM','value'=>'SD COMM','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'totalcomm','value'=>'Total COMM','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'salemcomm','value'=>'SALE(-)COMMISSION','is_show'=>$isshow,'issort'=>0];    
          return $result;
       } 
+      static function txn_RT_Daybook_header()
+     {
+         $isshow = 1;
+         $issort = 0;  
+         $result[] = ['name'=>'opname','value'=>'OPNAME','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'totalcount','value'=>'COUNT','is_show'=>$isshow,'issort'=>0]; 
+         $result[] = ['name'=>'totalsale','value'=>'SALE','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'RTCOMM','value'=>'RT COMM','is_show'=>$isshow,'issort'=>0];  
+         $result[] = ['name'=>'salemcomm','value'=>'SALE(-)COMMISSION','is_show'=>$isshow,'issort'=>0];    
+         return $result;
+      } 
+      static function txn_SD_Daybook_header()
+     {
+         $isshow = 1;
+         $issort = 0;  
+         $result[] = ['name'=>'opname','value'=>'OPNAME','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'totalcount','value'=>'COUNT','is_show'=>$isshow,'issort'=>0]; 
+         $result[] = ['name'=>'totalsale','value'=>'SALE','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'RTCOMM','value'=>'RT COMM','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'DISTCOMM','value'=>'DIST COMM','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'SDCOMM','value'=>'SD COMM','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'totalcomm','value'=>'Total COMM','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'salemcomm','value'=>'SALE(-)COMMISSION','is_show'=>$isshow,'issort'=>0];    
+         return $result;
+      } 
+      static function txn_DIST_Daybook_header()
+     {
+         $isshow = 1;
+         $issort = 0;  
+         $result[] = ['name'=>'opname','value'=>'OPNAME','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'totalcount','value'=>'COUNT','is_show'=>$isshow,'issort'=>0]; 
+         $result[] = ['name'=>'totalsale','value'=>'SALE','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'RTCOMM','value'=>'RT COMM','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'DISTCOMM','value'=>'DIST COMM','is_show'=>$isshow,'issort'=>0]; 
+         $result[] = ['name'=>'totalcomm','value'=>'Total COMM','is_show'=>$isshow,'issort'=>0];
+         $result[] = ['name'=>'salemcomm','value'=>'SALE(-)COMMISSION','is_show'=>$isshow,'issort'=>0];    
+         return $result;
+      } 
+
+
     
     static function txn_ledger_DIST_header()
     {
