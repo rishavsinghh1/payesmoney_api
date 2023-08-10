@@ -224,21 +224,29 @@ class PayoutController extends Controller
         $userid       = trim(strip_tags($request->userid));
         $search        = trim(strip_tags($request->search));
         if(empty($startdate) && empty($enddate)){
-            $startdate = date('Y-m-d', strtotime("-30 days"));
+            $startdate = date('Y-m-d');
             $enddate   = $this->today;  
         }
         $userdata = Auth::user();
-        $query = DB::table('users'); 
+        $query = DB::table('users');  
         if($userdata->role == 1){
             $userid =  $userdata->id;
-            $request=  ['transaction_cashdeposit.id','users.username','transaction_cashdeposit.cd_opening','transaction_cashdeposit.amount','transaction_cashdeposit.comm','transaction_cashdeposit.dcomm','transaction_cashdeposit.sdcomm','transaction_cashdeposit.tds','transaction_cashdeposit.cd_closing','transaction_cashdeposit.stype','transaction_cashdeposit.narration','transaction_cashdeposit.remarks','transaction_cashdeposit.ttype',
-            'transaction_cashdeposit.dateadded','transaction_cashdeposit.customercharge',DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 6 THEN tbl_transaction_cashdeposit.amount END) AS debit'),DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 0 THEN tbl_transaction_cashdeposit.amount END) AS credit')];
-            $query->where('transaction_cashdeposit.sid',$userid);
+            $request=  ['transaction_cashdeposit.id','users.username','transaction_cashdeposit.sopening as cd_opening','transaction_cashdeposit.amount','transaction_cashdeposit.comm','transaction_cashdeposit.dcomm','transaction_cashdeposit.sdcomm','transaction_cashdeposit.tds','transaction_cashdeposit.sclosing as cd_closing','transaction_cashdeposit.stype','transaction_cashdeposit.narration',
+                'transaction_cashdeposit.remarks','transaction_cashdeposit.ttype','transaction_cashdeposit.dateadded','transaction_cashdeposit.customercharge',
+                DB::raw('(CASE WHEN tbl_transaction_cashdeposit.stype="debit" THEN tbl_transaction_cashdeposit.amount END) AS debit'),
+                DB::raw('(CASE WHEN tbl_transaction_cashdeposit.stype="credit" THEN tbl_transaction_cashdeposit.amount END) AS credit')
+            ];
+            $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.sid', '=', 'users.id');
+            $query->where('transaction_cashdeposit.ttype','<>',6);
         }elseif($userdata->role == 3){
             $userid =  $userdata->id;
-            $request=  ['transaction_cashdeposit.id','users.username','transaction_cashdeposit.cd_opening','transaction_cashdeposit.amount','transaction_cashdeposit.sdcomm','transaction_cashdeposit.gst','transaction_cashdeposit.tds','transaction_cashdeposit.cd_closing','transaction_cashdeposit.sdtype','transaction_cashdeposit.narration','transaction_cashdeposit.remarks','transaction_cashdeposit.ttype','transaction_cashdeposit.dateadded',
-            'transaction_cashdeposit.customercharge',DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 6 THEN tbl_transaction_cashdeposit.amount END) AS debit'),DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 0 THEN tbl_transaction_cashdeposit.amount END) AS credit')];
+            $request=  ['transaction_cashdeposit.id','users.username','transaction_cashdeposit.sdopening as cd_opening','transaction_cashdeposit.amount','transaction_cashdeposit.sdcomm','transaction_cashdeposit.gst','transaction_cashdeposit.tds','transaction_cashdeposit.sdclosing as cd_closing','transaction_cashdeposit.sdtype','transaction_cashdeposit.narration','transaction_cashdeposit.remarks','transaction_cashdeposit.ttype','transaction_cashdeposit.dateadded',
+            'transaction_cashdeposit.customercharge',
+            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.sdtype="debit" THEN tbl_transaction_cashdeposit.amount END) AS debit'),
+            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.sdtype="credit" THEN tbl_transaction_cashdeposit.amount END) AS credit')];
             $query->where('transaction_cashdeposit.sdid',$userid);
+            $query->where('transaction_cashdeposit.ttype','<>',6);
+            $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.sdid', '=', 'users.id');
         }elseif($userdata->role == 4){
             $userid =  $userdata->id;
             $request=  ['transaction_cashdeposit.id',
@@ -255,9 +263,11 @@ class PayoutController extends Controller
             'transaction_cashdeposit.utype', 
             'transaction_cashdeposit.dateadded',
             'transaction_cashdeposit.customercharge',
-            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.dtype= "debit" THEN tbl_transaction_cashdeposit.amount END) AS debit'),
-            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.dtype= "credit" THEN tbl_transaction_cashdeposit.amount END) AS credit')];
+             DB::raw('(CASE WHEN tbl_transaction_cashdeposit.dtype="debit" THEN tbl_transaction_cashdeposit.amount END) AS debit'),
+            DB::raw('(CASE WHEN tbl_transaction_cashdeposit.dtype="credit" THEN tbl_transaction_cashdeposit.amount END) AS credit')];
             $query->where('transaction_cashdeposit.did',$userid);
+            $query->where('transaction_cashdeposit.ttype','<>',6);
+            $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.did', '=', 'users.id');
         } 
         elseif($userdata->role == 5){
             $userid =  $userdata->id;
@@ -266,14 +276,12 @@ class PayoutController extends Controller
             'transaction_cashdeposit.customercharge',
             DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 6 THEN tbl_transaction_cashdeposit.amount END) AS debit'),DB::raw('(CASE WHEN tbl_transaction_cashdeposit.ttype= 0 THEN tbl_transaction_cashdeposit.amount END) AS credit')];
             $query->where('transaction_cashdeposit.uid',$userid);
+            $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.uid', '=', 'users.id');
         } 
           
-       $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.uid', '=', 'users.id'); 
-       $query->select($request);  
-       
-               
-       $query->whereDate('transaction_cashdeposit.addeddate', '>=', $startdate);
-       $query->whereDate('transaction_cashdeposit.addeddate', '<=', $enddate); 
+        
+        $query->select($request);  
+        $query->whereBetween('transaction_cashdeposit.addeddate', [$startdate, $enddate]);  
             if($order != ""){
                 $query->orderBy('transaction_cashdeposit.id', $order);
                 
@@ -287,11 +295,7 @@ class PayoutController extends Controller
                         $q->orWhere('transaction_cashdeposit.amount', 'LIKE', "%{$search}%");  
                     }
                     return $q;
-                });
-            
-           
-             
-             
+                }); 
             $recordsTotal = $query->count(); 
             if ($length != "" && $start !="") {
                 $data = $query->skip($start)->take($length)->get()->toArray();
@@ -299,12 +303,8 @@ class PayoutController extends Controller
             }else{
                 $data = $query->get()->toArray();
                 $recordsFiltered = $query->count();
-            }
-            
-            
-
-          
-             if($userdata->role == 1){
+            } 
+            if($userdata->role == 1){
                 $head           = HEADERTrait::txn_ledger_admin_header();
             }else if($userdata->role == 3){
                 $head           = HEADERTrait::txn_ledger_admin_header();
@@ -357,98 +357,130 @@ class PayoutController extends Controller
         if($userdata->role == 1){
             $userid =  $userdata->id;
             if($status == 1){
-                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,SUM(tbl_recharge.comm) as totalcomm,SUM(tbl_recharge.amount)-SUM(tbl_recharge.comm) as salemcomm,ROUND(SUM(tbl_recharge.comm)/SUM(tbl_recharge.amount)*100,2) as RCOMM,ROUND(SUM(tbl_recharge.dcomm)/SUM(tbl_recharge.amount)*100,2) as DCOMM,ROUND(SUM(tbl_recharge.sdcomm)/SUM(tbl_recharge.amount)*100,2) as SDCOMM,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+                $request=  [DB::raw('tbl_recharge.operatorname as opname,COUNT(tbl_recharge.id) as totalcount, 
+                SUM(tbl_recharge.amount) as totalsale, 
+                SUM(tbl_recharge.comm)  as RTCOMM,
+                SUM(tbl_recharge.dcomm) as DISTCOMM,
+                SUM(tbl_recharge.sdcomm) as SDCOMM, 
+                ROUND((SUM(tbl_recharge.comm)+SUM(tbl_recharge.dcomm)+SUM(tbl_recharge.sdcomm))/SUM(tbl_recharge.amount)*100,2) as commission,
+                SUM(tbl_recharge.comm)+SUM(tbl_recharge.dcomm)+SUM(tbl_recharge.sdcomm) as totalcomm,
+                SUM(tbl_recharge.amount) - (SUM(tbl_recharge.comm)+SUM(tbl_recharge.dcomm)+SUM(tbl_recharge.sdcomm)) as salemcomm,
+                tbl_recharge.addeddate as date
+                ')];
             }elseif($status == 2){ 
                 $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
             }else{
-                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,
+                COUNT(tbl_recharge.id) as totalcount,
+                tbl_recharge.operatorname as opname,
+                tbl_recharge.addeddate as date')];
             }
             $query->where('transaction_cashdeposit.sid',$userid);
         }elseif($userdata->role == 3){
             $userid =  $userdata->id;
             if($status == 1){
-                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,SUM(tbl_recharge.comm) as totalcomm,SUM(tbl_recharge.amount)-SUM(tbl_recharge.comm) as salemcomm,ROUND(SUM(tbl_recharge.comm)/SUM(tbl_recharge.amount)*100,2) as RCOMM,ROUND(SUM(tbl_recharge.dcomm)/SUM(tbl_recharge.amount)*100,2) as DCOMM,ROUND(SUM(tbl_recharge.sdcomm)/SUM(tbl_recharge.amount)*100,2) as SDCOMM,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+                $request=  [DB::raw('tbl_recharge.operatorname as opname,COUNT(tbl_recharge.id) as totalcount, 
+                SUM(tbl_recharge.amount) as totalsale, 
+                SUM(tbl_recharge.comm)  as RTCOMM,
+                SUM(tbl_recharge.dcomm) as DISTCOMM,
+                SUM(tbl_recharge.sdcomm) as SDCOMM, 
+                SUM(tbl_recharge.comm)+SUM(tbl_recharge.dcomm)+SUM(tbl_recharge.sdcomm) as totalcomm,
+                SUM(tbl_recharge.amount) - (SUM(tbl_recharge.comm)+SUM(tbl_recharge.dcomm)+SUM(tbl_recharge.sdcomm)) as salemcomm,
+                tbl_recharge.addeddate as date')];
             }elseif($status == 2){ 
                 $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
             }else{
                 $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
             }
-            $query->where('transaction_cashdeposit.sid',$userid);
+            $query->where('transaction_cashdeposit.sdid',$userid);
         }elseif($userdata->role == 4){
             $userid =  $userdata->id;
             if($status == 1){
-                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,SUM(tbl_recharge.comm) as totalcomm,SUM(tbl_recharge.amount)-SUM(tbl_recharge.comm) as salemcomm,ROUND(SUM(tbl_recharge.comm)/SUM(tbl_recharge.amount)*100,2) as RCOMM,ROUND(SUM(tbl_recharge.dcomm)/SUM(tbl_recharge.amount)*100,2) as DCOMM,ROUND(SUM(tbl_recharge.sdcomm)/SUM(tbl_recharge.amount)*100,2) as SDCOMM,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+                $request=  [DB::raw('tbl_recharge.operatorname as opname,COUNT(tbl_recharge.id) as totalcount, 
+                SUM(tbl_recharge.amount) as totalsale, 
+                SUM(tbl_recharge.comm)  as RTCOMM,
+                SUM(tbl_recharge.dcomm) as DISTCOMM, 
+                SUM(tbl_recharge.comm)+SUM(tbl_recharge.dcomm) as totalcomm,
+                SUM(tbl_recharge.amount) - (SUM(tbl_recharge.comm)+SUM(tbl_recharge.dcomm)) as salemcomm,
+                tbl_recharge.addeddate as date')];
             }elseif($status == 2){ 
                 $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
             }else{
                 $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
             }
-            $query->where('transaction_cashdeposit.sid',$userid);
+            $query->where('transaction_cashdeposit.did',$userid);
         }elseif($userdata->role == 5){
             $userid =  $userdata->id;
+            
             if($status == 1){
-                $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,SUM(tbl_recharge.comm) as totalcomm,SUM(tbl_recharge.amount)-SUM(tbl_recharge.comm) as salemcomm,ROUND(SUM(tbl_recharge.comm)/SUM(tbl_recharge.amount)*100,2) as RCOMM,ROUND(SUM(tbl_recharge.dcomm)/SUM(tbl_recharge.amount)*100,2) as DCOMM,ROUND(SUM(tbl_recharge.sdcomm)/SUM(tbl_recharge.amount)*100,2) as SDCOMM,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
+                $request=  [DB::raw('tbl_recharge.operatorname as opname,COUNT(tbl_recharge.id) as totalcount, 
+                SUM(tbl_recharge.amount) as totalsale, 
+                SUM(tbl_recharge.comm)  as RTCOMM,  
+                SUM(tbl_recharge.comm) as totalcomm,
+                SUM(tbl_recharge.amount) - (SUM(tbl_recharge.comm)) as salemcomm,
+                tbl_recharge.addeddate as date')];
             }elseif($status == 2){ 
                 $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
             }else{
                 $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
             }
-            $query->where('transaction_cashdeposit.sid',$userid);
+            $query->where('transaction_cashdeposit.uid',$userid);
         }
         
         $query->leftjoin('transaction_cashdeposit', 'transaction_cashdeposit.id', '=', 'recharge.txnid'); 
         $query->select($request);   
-
-        $query->whereDate('recharge.addeddate', '>=', $startdate);
-        $query->whereDate('recharge.addeddate', '<=', $enddate); 
- 
-            // if($status == 1){
-            // $query->select(DB::raw('SUM(rech.amount) as totalsale,COUNT(rech.id) as totalcount,SUM(rech.comm) as totalcomm,SUM(rech.amount)-SUM(rech.comm) as salemcomm,ROUND(SUM(rech.comm)/SUM(rech.amount)*100,2) as commission') ,'rech.operatorname as opname','rech.addeddate as date');
-            // }elseif($status == 2){ 
-            // $query->select(DB::raw("SUM(rech.amount) as totalsale,COUNT(rech.id) as totalcount") ,'rech.operatorname as opname','addeddate as date');
-            // }else{
-            // $query->select(DB::raw("SUM(rech.amount) as totalsale,COUNT(rech.id) as totalcount") ,'rech.operatorname as opname','addeddate as date');
-            // }
-            // if ($startdate != "" || $enddate   != "") {
-            //     $query->whereRaw("date('rech.addeddate') between '{$startdate}' and '{$enddate}'");
-            //     //$query->whereDate('addeddate', '>=', $startdate);
-            // }
+        $query->whereBetween('transaction_cashdeposit.addeddate', [$startdate, $enddate]); 
+        // $query->whereDate('recharge.addeddate', '>=', $startdate);
+        // $query->whereDate('recharge.addeddate', '<=', $enddate);  
             $query->where('recharge.status',$status); 
              $query->groupBy('operatorname');  
              $query->orderByRaw('COUNT("recharge.id") DESC');
-             $recordsTotal = $query->count();
-
+             $recordsTotal = $query->count(); 
             $data = $query->get()->toArray();
-            dd($data);
+           // dd($data);
             if($userdata->role == 1){
                 $head           = HEADERTrait::txn_S_Daybook_header();
-            }else if($$userdata->role == 3){
-                $head           = HEADERTrait::txn_S_Daybook_header();
+            }else if($userdata->role == 3){
+                $head           = HEADERTrait::txn_SD_Daybook_header();
             }else if($userdata->role == 4){
-                $head           = HEADERTrait::txn_S_Daybook_header();
+                $head           = HEADERTrait::txn_DIST_Daybook_header();
             }else if($userdata->role == 5){
-                $head           = HEADERTrait::txn_S_Daybook_header();
+                $head           = HEADERTrait::txn_RT_Daybook_header();
             } 
             if (!empty($data)) {
                 $totalcount=0;
                 $totalsale=0;
                 $totalsalemcomm=0;
                 $totalcommission=0; 
+                $totalRTCOMM = 0;
+                $totalSDCOMM = 0;
+                $totalDISTCOMM = 0;
                 foreach($data as $key=>$datum){  
-                    $totalcount +=  $datum->totalcount;
-                    $totalsale +=  $datum->totalsale;
-                            if($status == 1){
-                                $totalsalemcomm +=  $datum->salemcomm;
+                        $totalcount +=  $datum->totalcount;
+                        $totalsale +=  $datum->totalsale;
+                        if($status == 1){
+                                $totalsalemcomm +=  $datum->salemcomm; 
                                 $totalcommission +=  $datum->totalcomm;
+                                $totalRTCOMM += empty($datum->RTCOMM)?'0':$datum->RTCOMM;
+                                $totalSDCOMM += empty($datum->SDCOMM)?'0':$datum->SDCOMM;
+                                $totalDISTCOMM += empty($datum->DISTCOMM)?'0':$datum->DISTCOMM;
                             }  
                         $dateTime = new DateTime($datum->date, new DateTimeZone('Asia/Kolkata'));  
                         $data[$key]->date =   $dateTime->format("d-m-Y  g:i:s A");  
                 }
                 return $this->response('success', ['message' => "Success.",'header' => $head,
-                'data' => $data,
-                'recordsTotal'=> $recordsTotal,
-                'total' => ['totalcount'=>$totalcount,'totalsale'=>$totalsale,'totalsalemcomm'=>$totalsalemcomm,'totalcommission'=>$totalcommission],
-            ]); 
+                        'data' => $data,
+                        'recordsTotal'=> $recordsTotal,
+                        'total' => [
+                        'totalcount'=>$totalcount,
+                        'totalsale'=>$totalsale,
+                        'totalsalemcomm'=>$totalsalemcomm,
+                        'totalcommission'=>$totalcommission,
+                        'totalrtcomm'=>$totalRTCOMM,
+                        'totalsdcomm'=>$totalSDCOMM,
+                        'totaldistcomm'=>$totalDISTCOMM
+                ]
+                ]); 
             
             } else {
                 return $this->response('noresult', ['statuscode'=>200]); 

@@ -194,6 +194,7 @@ class RetailerController extends Controller
             
            
             $query->where('users.role',5);
+            
             if($request->user()->role == 3){
                 $userid =  $request->user()->id;
                 $query->where('users.supdistributor',$userid);
@@ -217,10 +218,14 @@ class RetailerController extends Controller
                 $data = $query->get()->toArray();
                 $recordsFiltered = $query->count();
             }
-            if($request->user()->user_type == 0){
+            if($request->user()->role == 1){
+                $head           = HEADERTrait::RAdminHeader();
+            }else if($request->user()->role == 3){
                 $head           = HEADERTrait::SdHeader();
+            }else if($request->user()->role == 4){
+                 $head           = HEADERTrait::distHeader();
             }else{
-                $head           = HEADERTrait::SdHeader();
+                $head           = HEADERTrait::RRTHeader();
             }
             if(!empty($data)){
                 $totalamt =0;

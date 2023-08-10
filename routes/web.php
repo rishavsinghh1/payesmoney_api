@@ -161,7 +161,7 @@ $router->get('distributor','ConfigurationController@distributor');
             
         });
         $router->post('user/get-user', ['as' => 'get-user', 'uses' => 'User\UserController@getUser']); 
-        
+        $router->post('get-user', ['as' => 'get-user', 'uses' => 'User\UserController@getUser']);
         $router->group(['prefix' => 'superdist'], function () use ($router) { 
             $router->post('create', 'User\SD\SuperDistController@create'); 
             $router->post('list', 'User\SD\SuperDistController@list');   
