@@ -275,150 +275,78 @@ class FundingController extends Controller
             return $this->response('notvalid', $response); 
         } 
     } 
-    function transferLoadfund($reqid){ 
-        $request = Creditrequest::select("*")->where("id", $reqid)->where("status", 2)->where("requesttype", 5)->first();
-        if (!empty($request)) {
-            $debitor = User::select("*")->where(array('id'=>$request['debitor'],"status"=>1))->whereIn('role',array(1,3,4))->first();
-            $creditor = User::select("*")->where(array('id'=>$request['userid'],"status"=>1))->whereIn('role',array(2,3,4,5))->first(); 
-            if(!empty($debitor) && !empty($creditor) && $debitor->id!=$creditor->id){
-                $wherestmtarrayd     =   array();
-                $prvclosing         =   "";
-                if($debitor['role'] == 1){
-                    $wherestmtarrayd["sid"]  =$debitor->id;
-                    $prvclosing     =   "sclosing";
-                }elseif($debitor['role'] == 3){
-                    $wherestmtarrayd["sdid"]  =   $debitor->id;
-                    $prvclosing     =   "sdclosing";
-                }elseif($debitor['role'] == 4){
-                    $wherestmtarrayd["did"]  =   $debitor->id;
-                    $prvclosing     =   "dclosing";
-                }else{
-                    $prvclosing     =   "";
-                }
-                if($prvclosing !=""){
-                  $cashclosing =  self::getclosing($wherestmtarrayd,$debitor->cd_balance,$prvclosing,$debitor->role);
-                  $debt_closing   =   $debitor->cd_balance - $request['amount'];
-                  $wherestmtarrayc = [];
-                  if($creditor['role'] == 3){
-                      $wherestmtarrayc["sdid"]  =   $creditor->id;
-                      $prvcclosing     =   "sdclosing";
-                  }elseif($creditor['role'] == 4){
-                      $wherestmtarrayc["did"]  =   $creditor->id;
-                      $prvcclosing     =   "dclosing";
-                  }elseif($creditor['role'] == 5){
-                      $wherestmtarrayc["uid"]  =   $creditor['id'];
-                      $prvcclosing     = "cd_closing";
-                  }elseif($creditor['role'] == 2){
-                    $wherestmtarrayc["aid"]  =   $creditor->id;
-                    $prvcclosing     =   "aclosing";
-                   }else{
-                      $prvcclosing     =   "";
-                  }
-                if($prvcclosing!=""){ 
-                    $cashclosingCrdditer =  self::getclosing($wherestmtarrayc,$creditor->cd_balance,$prvcclosing,$creditor->role);
-                    if($cashclosingCrdditer){
-                        $cedit_closing   =   $creditor->cd_balance + $request['amount'];
-                        $deductbalance =  DB::table('users')->where('id', $debitor->id)->update(['cd_balance' =>DB::raw('cd_balance-'.$request['amount'])]); 
-                        if($deductbalance){
-                            $narration = $debitor->name ."(".$debitor->username."-".$debitor->firmname.") transfer Rs.".$request['amount']." to ".$creditor->name."(".$creditor->username."-".$creditor->firmname.")";
-                            $request_ins = array(  
-                                "amount" => $request['amount'],
-                                "narration" => $narration,
-                                "status" => 1,
-                                "refunded" => 0,
-                                "ipaddress" => $_SERVER['REMOTE_ADDR'],
-                                "ttype" => 0,
-                                "addeddate" => date('Y-m-d'),
-                            );
-                            if ($debitor->role == 1) {
-                                $request_ins["sid"] = $debitor['id'];
-                                $request_ins["sopening"] = $debitor['cd_balance'];
-                $request_ins["sclosing"] = $debt_closing;
-                $request_ins["stype"] = "debit"; 
-            } elseif ($debitor->role == 3) {
-                $request_ins["sdid"] = $debitor['id'];
-                $request_ins["sdopening"] = $debitor['cd_balance'];
-                $request_ins["sdclosing"] = $debt_closing;
-                $request_ins["sdtype"] = "debit"; 
-            } elseif ($debitor->role == 4) {
-                $request_ins["did"] = $debitor['id'];
-                $request_ins["dopening"] = $debitor['cd_balance'];
-                $request_ins["dclosing"] = $debt_closing;
-                $request_ins["dtype"] = "debit";
-            } else {
-                $return['status']   =   0;
-                $return['message']  =   "This transaction cannot be processed. Please try later.";
-            }
-            if ($creditor->role == 3) {
-                $request_ins["sdid"] = $creditor['id'];
-                $request_ins["sdopening"] = $creditor['cd_balance'];
-                $request_ins["sdclosing"] = $cedit_closing;
-                $request_ins["sdtype"] = "credit"; 
-            } elseif ($creditor->role == 4) {
-                $request_ins["did"] = $creditor['id'];
-                $request_ins["dopening"] = $creditor['cd_balance'];
-                $request_ins["dclosing"] = $cedit_closing;
-                $request_ins["dtype"] = "credit";
-            } elseif ($creditor->role == 5) {
-                $request_ins["uid"] = $creditor['id'];
-                $request_ins["cd_opening"] = $creditor['cd_balance'];
-                $request_ins["cd_closing"] = $cedit_closing;
-                $request_ins["utype"] = "credit";
-            }elseif ($creditor->role == 2) {
-                $request_ins["aid"] = $creditor['id'];
-                $request_ins["aopening"] = $creditor['cd_balance'];
-                $request_ins["aclosing"] = $cedit_closing;
-                $request_ins["atype"] = "credit";
-            } else {
-                $return['status']   =   0;
-                $return['message']  =   "This transaction cannot be processed. Please try later.";
-            }
-            $cashData = CashTransaction::insert($request_ins);
-            $insertId =DB::getPdo()->lastInsertId();
-                            if($cashData){
-                                $creditbalance =  DB::table('users')->where('id', $creditor->id)->update(['cd_balance' =>DB::raw('cd_balance+'.$request['amount']),'othercredit' =>DB::raw('othercredit+'.$request['amount'])]); 
-                                if($creditbalance){
-                                    $creditbalance =  DB::table('creditrequest')->where('id',$request['id'])->update(['status' =>1,'txnid' =>$insertId]); 
-                                    $return['status']   =   1;
-                                    $return['message']  =   "Transaction Successful";
-                                    $return['newbalance']  =   $debt_closing;
-                                }else {
-                                    $return['status']   =   0;
-                                    $return['message']  =   "This transaction cannot be processed. Please try later.";
-                                }
-                            }else {
-                                $return['status']   =   0;
-                                $return['message']  =   "Unable to update ledger";
-                            }
-    
-                        }else {
-                            $return['status']   =   0;
-                            $return['message']  =   "Unable to debit account";
-                        }
+    public function transferfund(Request $request){
+       $userdata = Auth::user();   
+       if ($userdata) {
+        if ($userdata && in_array($userdata->role, array(1,3,4))) {
+            if ($userdata->cd_balance != 0 && $userdata->cd_balance >= $request->amount) {
+                try {
+                    $validated = Validator::make($request->all(), [
+                        'userid'   => 'required', 
+                        "amount"      => 'required|numeric'   //'required|numeric|min:99'  
+                        
+                    ]);
+                    if ($validated->fails()) {
+                        $message   = $this->validationResponse($validated->errors());
+                        return $this->response('validatorerrors', $message);
+                    } 
+                    $requestdata["userid"] = $request->userid;
+                    $requestdata["debitor"] = $userdata->id;
+                    $requestdata["amount"] = $request->amount;
+                    $requestdata["status"] = 2;
+                    $requestdata["requesttype"] = 5;
+                    $requestdata["addeddate"] =  date('Y-m-d');
+                    $requestdata["depositeddate"] =  date('Y-m-d'); 
+                    $Addcredit = Creditrequest::insert($requestdata);  
+                    $insertId =DB::getPdo()->lastInsertId();
+                    if($Addcredit){
+                        $response = $this->transferLoadfund($insertId);
+                        if($response['status']){
+                            $response = [
+                                'message' => $response['message'],
+                                'newbalance'=>$response['newbalance']
+                            ];
+                            return $this->response('success', $response);
+                        }else { 
+                            $response = [
+                                'errors' => "invalid!",
+                                'message' => $response['message']
+                            ];
+                            return $this->response('notvalid', $response); 
+                        } 
                     }else{
-                       // $this->db->insert("warnings",array("message"=>"Unauthorised funding accessed by ".$debitor['username']));
-                        $return['status']   =   0;
-                        $return['message']  =   "Something went wrong. This transaction cannot be processed.";
+                        $response = [
+                            'errors' => "invalid!",
+                            'message' => "Some Error Occured!! contact service Provider!"
+                        ];
+                        return $this->response('notvalid', $response); 
                     }
-                }else{
-                    $return['status']   =   0;
-                    $return['message']  =   "Unable to get certidor details";  
-                 } 
-                 
-                }else{
-                    $return['status']   =   0;
-                    $return['message']  =   "Unable to get debitor details";    
+                    
+                } catch (\Throwable $th) {
+                    return $this->response('internalservererror', ['message' => $th->getMessage()]);
                 }
-            }else{
-                    $return['status']   =   0;
-                    $return['message']  =   "Unable to get  Creditor or debitor";
+            } else {
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "You have low balance in your account please recharge or reduce the amount of transfer"
+                ];
+                return $this->response('notvalid', $response);  
             }
-        }else{
-            $return['status']   =   0;
-            $return['message']  =   "Unable to get fund request";
-        }
-        return $return; 
+        }else { 
+            $response = [
+                'errors' => "invalid!",
+                'message' => "Restricted area!!"
+            ];
+            return $this->response('notvalid', $response); 
+        } 
+       }else{
+        $response = [
+            'errors' => "invalid!",
+            'message' => "Some Error Occure !! Re-login"
+        ];
+        return $this->response('notvalid', $response);  
        }
+    }
     public function approve(Request $request){
         $userdata = Auth::user();   
         if ($userdata) {
@@ -623,7 +551,7 @@ class FundingController extends Controller
                             return $q;
                         }); 
 
-                    // $query->where('users.role',5);
+                     $query->where('users.role',5);
                     if ($status != "" ) {
                         $query->where('creditrequest.status',$status);
                     }

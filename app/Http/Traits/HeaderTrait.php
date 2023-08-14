@@ -499,4 +499,46 @@ trait HeaderTrait
         $column[] = ['name' => 'remarks', 'value' => 'Remarks', 'is_show' => $isshow, 'issort' => 0]; 
         return $column;
      }  
+
+    static function txn_Refundledger_SD_header()
+    {
+        $isshow = 1;
+        $issort = 0; 
+        $column[] = ['name' => 'refunddate', 'value' => 'Refund DATE&TIME', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'txn_id', 'value' => 'Transaction ID', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'refundtxnid', 'value' => 'Refund Txn ID', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'firmname', 'value' => 'FIRMNAME', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'amount', 'value' => 'RECH Amount', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'sdcomm', 'value' => 'DEBIT SD.COMM', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'dcomm', 'value' => 'DEBIT DIST.COMM', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'remarks', 'value' => 'Remarks', 'is_show' => $isshow, 'issort' => 0]; 
+        return $column;
+    }
+    static function txn_Refundledger_DIST_header()
+    {
+        $isshow = 1;
+        $issort = 0;  
+        $column[] = ['name' => 'refunddate', 'value' => 'Refund DATE&TIME', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'txn_id', 'value' => 'Transaction ID', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'refundtxnid', 'value' => 'Refund Txn ID', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'firmname', 'value' => 'FIRMNAME', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'amount', 'value' => 'RECH Amount', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'dcomm', 'value' => 'DEBIT DIST.COMM', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'remarks', 'value' => 'Remarks', 'is_show' => $isshow, 'issort' => 0]; 
+        return $column;
+    }
+    static function txn_Refundledger_Super_header()
+    {
+        $isshow = 1;
+        $issort = 0; 
+        $column[] = ['name' => 'refunddate', 'value' => 'Refund DATE&TIME', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'txn_id', 'value' => 'Transaction ID', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'refundtxnid', 'value' => 'Refund Txn ID', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'firmname', 'value' => 'FIRMNAME', 'is_show' => $isshow, 'issort' => $issort];
+        $column[] = ['name' => 'amount', 'value' => 'RECH Amount', 'is_show' => $isshow, 'issort' => 0];
+        $column[] = ['name' => 'sdcomm', 'value' => 'DEBIT SD.COMM', 'is_show' => $isshow, 'issort' => 0]; 
+        $column[] = ['name' => 'dcomm', 'value' => 'DEBIT DIST.COMM', 'is_show' => $isshow, 'issort' => 0];  
+        $column[] = ['name' => 'remarks', 'value' => 'Remarks', 'is_show' => $isshow, 'issort' => 0]; 
+        return $column;
+    }
 }

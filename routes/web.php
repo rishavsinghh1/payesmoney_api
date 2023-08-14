@@ -17,6 +17,8 @@ $router->get('/', function () use ($router) {
 $router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge');
 $router->get('superdistributor','ConfigurationController@superdistributor'); 
 $router->get('distributor','ConfigurationController@distributor'); 
+$router->get('Refundsd','ConfigurationController@Refundsd'); 
+ 
 // $router->group(['middleware' => 'checkip'], function () use ($router) { 
     //auth routes
     $router->group(['prefix' => 'auth'], function () use ($router) {
@@ -154,14 +156,16 @@ $router->get('distributor','ConfigurationController@distributor');
             $router->post('getoperator', 'Recharge\Prepaidrecharge@getoperator'); 
             $router->post('getRoffer', 'Recharge\Prepaidrecharge@getRoffer');
             $router->post('getDthDetails', 'Recharge\Prepaidrecharge@getDthDetails');
-            $router->post('dayledger', 'Reports\PayoutController@dayledger'); 
-            
-            
-             
-            
-        });
+            $router->post('dayledger', 'Reports\PayoutController@dayledger');  
+
+            $router->post('refundReport', 'Reports\PayoutController@refundReport');
+        }); 
+        $router->group(['prefix' => 'manual'], function () use ($router) { 
+            $router->post('updateSucesstoFailedRec', 'Recharge\ManualProcessController@updateSucesstoFailedRec'); 
+        }); 
         $router->post('user/get-user', ['as' => 'get-user', 'uses' => 'User\UserController@getUser']); 
         $router->post('get-user', ['as' => 'get-user', 'uses' => 'User\UserController@getUser']);
+        
         $router->group(['prefix' => 'superdist'], function () use ($router) { 
             $router->post('create', 'User\SD\SuperDistController@create'); 
             $router->post('list', 'User\SD\SuperDistController@list');   
@@ -192,7 +196,7 @@ $router->get('distributor','ConfigurationController@distributor');
             $router->post('create', 'funding\FundingController@create');  
             $router->post('addfund', 'funding\FundingController@AdminAddFund');  
             $router->post('addfundsuperadmin', 'funding\FundingController@addfundsuperadmin');  
-            $router->post('transferfund', 'funding\FundingController@transferfund');  
+            $router->post('transferfund', 'funding\FundingController@transferLoadfund');  
             $router->post('approve', 'funding\FundingController@approve');  
             $router->post('getFundingRequestDetail', 'funding\FundingController@getFundingRequestDetail'); 
             $router->post('getlistfund','funding\FundingController@getpendingFund');
@@ -219,12 +223,7 @@ $router->get('distributor','ConfigurationController@distributor');
             $router->post('getlist', ['as' => 'list', 'uses' => 'Companybank\BankController@getlist']);  
             //$router->post('update', ['as' => 'update', 'uses' => 'Permission\PermissionController@Permissionupdate']); 
             
-        });
-
-        
-        
-
-        
+        });   
     }); 
  
         
