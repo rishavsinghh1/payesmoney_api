@@ -10,6 +10,7 @@ use App\Models\CashTransaction;
 use App\Http\Traits\RechargeTrait;
 use App\Http\Traits\CommissionTrait;
 use Carbon\Carbon;
+use App\Models\RefundTransaction;
 class ConfigurationController extends Controller
 {
     use CommonTrait,RechargeTrait,CommissionTrait;
@@ -100,6 +101,67 @@ class ConfigurationController extends Controller
         }
         return $this->response('success', $result);
 
+    }
+
+
+    public function Refundsd(Request $request){
+        $query = DB::select(("SELECT id,sdid,ttype, 
+        sum(if(status = 2,sdcomm,'')) as credit, 
+        sum(if(status = 1,sdcomm,'')) as debit
+        FROM `tbl_refund_transaction`
+        where sdid is NOT null 
+        and date_format(`addeddate`,'%Y-%m-%d') = '".$this->mindate."' and  sdcomm > 0 GROUP BY id,sdid,ttype")); 
+        $totaldata = $query;   
+    
+        foreach($totaldata  as  $val){
+            $commission  =  $val->credit;
+            $tds = 0;
+            $netcomm = $commission - $tds;
+            $reqData    =   array(
+                "id"		=> 	$val->sdid,
+                "amount"	=>	$netcomm,
+                "commission"=>	$commission,
+                "tds"		=>	$tds,
+                "addeddate"	=>	 $this->today, 
+                "narration"	=>	"Refund Txn Debit of ".RechargeTrait::txn_type($val->ttype)." Rs. ".$netcomm." of Date : ".$this->mindate,    
+            );  
+          
+           $result = CommissionTrait::Debitsupercomm($reqData);  
+         
+        }
+        return  $result;
+    }
+
+    public function RefundDist(Request $request){
+        $query = DB::select(("SELECT id,sdid,ttype, 
+        sum(if(status = 2,dcomm,'')) as credit, 
+        sum(if(status = 1,dcomm,'')) as debit
+        FROM `tbl_refund_transaction`
+        where sdid is NOT null 
+        and date_format(`addeddate`,'%Y-%m-%d') = '".$this->mindate."' and  dcomm > 0 GROUP BY id,did,ttype")); 
+        $totaldata = $query;   
+      
+        foreach($totaldata  as  $val){
+            $commission  =  $val->credit;
+            $tds = 0;
+            $netcomm = $commission - $tds;
+            $reqData    =   array(
+                "id"		=> 	$val->did,
+                "amount"	=>	$netcomm,
+                "commission"=>	$commission,
+                "tds"		=>	$tds,
+                "addeddate"	=>	 $this->today, 
+                "narration"	=>	"Refund Txn Debit of ".RechargeTrait::txn_type($val->ttype)." Rs. ".$netcomm." of Date : ".$this->mindate,    
+            );  
+          
+           $result = CommissionTrait::Debitsupercomm($reqData); 
+           if($result){
+            $updatedb =  DB::table('refund_transaction')->where('id', $val->id)->update(['status' =>1]);  
+           }
+          
+         
+        }
+        return $this->response('success', $result);
     }
 
     

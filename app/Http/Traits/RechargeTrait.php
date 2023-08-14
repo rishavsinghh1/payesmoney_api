@@ -62,9 +62,7 @@ trait RechargeTrait
                 if($isupdate){
                     $insertedid = CashTransaction::insertGetId($stmtData);
                     if($insertedid){
-                        $txnData["txnid"] = $insertedid;
-                        $txnData["txnid"] = $insertedid;
-                        $txnData["txnid"] = $insertedid;
+                        $txnData["txnid"] = $insertedid; 
                         $insTxn = Recharge::insertGetId($txnData);
                         if ($insTxn) { 
                             $return = array("status" => 1,"txnno"=>$insertedid,"orderid"=>$insTxn, "message" => "Transaction Successfull");

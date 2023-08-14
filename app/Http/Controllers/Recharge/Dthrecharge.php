@@ -82,6 +82,7 @@ class Dthrecharge extends Controller
                                                 $update_request = Recharge::where("id", $requestdata['orderid'])
                                                 ->update([
                                                     "status" => 1,
+                                                    "api_status" =>1,
                                                     "operatorid"=>$rs['data']['refTransactionNumber'],
                                                     'ackno'=>$rs['data']['refTransactionNumber']
                                                 ]); 
@@ -97,6 +98,7 @@ class Dthrecharge extends Controller
                                             $update_request = Recharge::where("id", $requestdata['orderid'])
                                             ->update([
                                                 "status" => 1,
+                                                "api_status" =>2,
                                                 "operatorid"=>'PM'.rand(000000,11111),
                                                 'ackno'=>'PM'.rand(000000,11111),
                                             ]); 
@@ -124,6 +126,7 @@ class Dthrecharge extends Controller
                                             'refundtxnid' => $rechcredit['txnno'],
                                             'refunded' => 1,
                                             'status' => 3, 
+                                            "api_status" =>3,
                                             'daterefunded' => date('Y-m-d'),
                                         ];
                                         $isupdate = Recharge::where('id', $requestdata['orderid'])->update($txnupdate); 
@@ -156,6 +159,7 @@ class Dthrecharge extends Controller
                                         $update_request = Recharge::where("id", $requestdata['orderid'])
                                          ->update([
                                              "status" => 1,
+                                             "api_status" =>2,
                                              "operatorid"=>'PMN'.rand(000000,11111),
                                              'ackno'=>'PMN'.rand(000000,11111),
                                          ]); 

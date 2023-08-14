@@ -85,6 +85,7 @@ class Prepaidrecharge extends Controller
                                             $update_request = Recharge::where("id", $requestdata['orderid'])
                                               ->update([
                                                 "status" => 1,
+                                                "api_status" =>1,
                                                 "operatorid"=>$rs['data']['refTransactionNumber'],
                                                 'ackno'=>$rs['data']['refTransactionNumber']
                                                 ]); 
@@ -101,6 +102,7 @@ class Prepaidrecharge extends Controller
                                             $update_request = Recharge::where("id", $requestdata['orderid'])
                                             ->update([
                                                 "status" => 1,
+                                                "api_status" =>2,
                                                 "operatorid"=>'PM'.rand(000000,11111),
                                                 'ackno'=>'PM'.rand(000000,11111),
                                             ]); 
@@ -129,6 +131,7 @@ class Prepaidrecharge extends Controller
                                                 'refundtxnid' => $rechcredit['txnno'],
                                                 'refunded' => 1,
                                                 'status' => 3, 
+                                                "api_status" =>3,
                                                 'daterefunded' => date('Y-m-d'),
                                             ];
                                             $isupdate = Recharge::where('id', $requestdata['orderid'])->update($txnupdate); 
@@ -151,6 +154,7 @@ class Prepaidrecharge extends Controller
                                             ]); 
                                             $response = [
                                                 'message' => "SUCCESS",
+                                                "api_status" =>2,
                                                 'txnno'=>$requestdata['txnno'],
                                                 'operatorid'=>'PM'.rand(000000,11111),
                                                 'operatorname'=>$operator->name,
@@ -163,6 +167,7 @@ class Prepaidrecharge extends Controller
                                    $update_request = Recharge::where("id", $requestdata['orderid'])
                                     ->update([
                                         "status" => 1,
+                                        "api_status" =>2,
                                         "operatorid"=>'PMN'.rand(000000,11111),
                                         'ackno'=>'PMN'.rand(000000,11111),
                                     ]); 
@@ -358,6 +363,7 @@ class Prepaidrecharge extends Controller
                     $txnupdate = [
                         'operatorid' => $payload['operator_id'],
                         'ackno' => $payload['txn_id'],
+                        "api_status" =>1,
                         'status' => 1, 
                     ];
                     $isupdate = Recharge::where('txnid', $info->txnid)->update($txnupdate);
@@ -380,7 +386,8 @@ class Prepaidrecharge extends Controller
                     $txnupdate = [
                         'refundtxnid' => $rechcredit['txnno'],
                         'refunded' => 1,
-                        'status' => 3, 
+                        'status' => 3,
+                         "api_status" =>1,
                         'daterefunded' => date('Y-m-d'),
                     ];
                     $isupdate = Recharge::where('id', $info->id)->update($txnupdate); 
@@ -407,4 +414,6 @@ class Prepaidrecharge extends Controller
             return $this->response('success', $response);
         }
     }
+
+    
 }

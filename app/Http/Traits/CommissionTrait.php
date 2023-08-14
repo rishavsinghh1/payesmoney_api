@@ -55,7 +55,56 @@ trait CommissionTrait
       return $query->get()->toArray();
         
    }
-
+   public static function Debitsupercomm($reqData){
+    $return     =   array();
+    $debitor    =  User::select("*")->where("id",$reqData['id'])->first();
+    if(!empty($debitor)){
+          
+         
+       if(self::getclosing(array("sdid"=>$debitor->id),$debitor->cd_balance,"sdclosing",$debitor->role)){
+          $debt_closing = $debitor->cd_balance - $reqData['amount'];
+           //credit Commission details  
+           
+           $updatedb =  DB::table('users')->where('id', $debitor->id)->update(['cd_balance' =>DB::raw('cd_balance-'.$reqData['amount'])]);  
+         
+           if($updatedb){
+                   $transaction = array(
+                      "sdid"      => $debitor->id,
+                      "amount"    => $reqData['amount'],
+                      "sdcomm"    => 0,
+                      "tds"       => $reqData['tds'],
+                      "sdtype"    => "credit",
+                      "sdopening" => $debitor->cd_balance,
+                      "sdclosing" => $debt_closing,
+                      "narration" => $reqData['narration'],
+                      "status"    => 1,
+                      "refunded"  => 0,
+                      "addeddate" => $reqData['addeddate'],
+                      "ttype"     => 11,
+                );
+                $last_txn_id_of_sd_comm = CashTransaction::insertGetId($transaction); 
+                if ($last_txn_id_of_sd_comm) {
+                   $return['status']   =   1;
+                   $return['message']  =   "This transaction processed.";
+                } else {
+                      $return['status']   =   0;
+                      $return['message']  =   "This transaction cannot be processed. Please try later.";
+                }
+           }else {
+             $return['status']   =   0;
+             $return['message']  =   "Unable to update wallet transaction.";
+          }  
+       }else{
+         // $this->db->insert("warnings",array("message"=>"Unauthorised funding accessed by ".$debitor->username));
+          $return['status']   =   0;
+          $return['message']  =   "Transaction cannot process. API Partner wallet mis-matched";
+      }
+    }else{
+          $return['status']   =   0;
+          $return['message']  =   "This user cannot be fund. Please try later.";
+      }
+      return $return;
+ }
    public static function supercomm($reqData){
       $return     =   array();
       $debitor    =  User::select("*")->where("id",$reqData['id'])->first();
@@ -102,8 +151,7 @@ trait CommissionTrait
             $return['message']  =   "This user cannot be fund. Please try later.";
         }
         return $return;
-   }
-
+   } 
    public static function distributorcomm($reqData){
     $return     =   array();
     $debitor    =  User::select("*")->where("id",$reqData['id'])->first();
@@ -149,7 +197,7 @@ trait CommissionTrait
           $return['message']  =   "This user cannot be fund. Please try later.";
       }
       return $return;
- }
+    }
 
    public static function getclosing($where,$balance,$columname,$usertype){
       $query = DB::table('transaction_cashdeposit');
