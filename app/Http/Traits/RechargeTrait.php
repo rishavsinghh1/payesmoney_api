@@ -53,7 +53,6 @@ trait RechargeTrait
         $u_data =  $query[0];   
          $stmtData['cd_opening']   =  $u_data->cd_balance;
          $stmtData['cd_closing']   =  ($stmtData['cd_opening']-$agentcl);
-
          if(count($query)!=0 && $u_data->cd_balance>=$agentcl){
             if(self::roundval($u_data->cd_closing) == self::roundval($u_data->cd_balance)){
                 $cd_balance = $u_data->cd_balance - $agentcl;

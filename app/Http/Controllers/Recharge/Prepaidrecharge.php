@@ -387,7 +387,7 @@ class Prepaidrecharge extends Controller
                         'refundtxnid' => $rechcredit['txnno'],
                         'refunded' => 1,
                         'status' => 3,
-                         "api_status" =>1,
+                        "api_status" =>3,
                         'daterefunded' => date('Y-m-d'),
                     ];
                     $isupdate = Recharge::where('id', $info->id)->update($txnupdate); 

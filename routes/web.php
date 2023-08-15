@@ -18,7 +18,7 @@ $router->get('recharge/payesmoney', 'Recharge\Prepaidrecharge@callbackrecharge')
 $router->get('superdistributor','ConfigurationController@superdistributor'); 
 $router->get('distributor','ConfigurationController@distributor'); 
 $router->get('Refundsd','ConfigurationController@Refundsd'); 
- 
+$router->get('RefundDist','ConfigurationController@RefundDist'); 
 // $router->group(['middleware' => 'checkip'], function () use ($router) { 
     //auth routes
     $router->group(['prefix' => 'auth'], function () use ($router) {
@@ -196,7 +196,7 @@ $router->get('Refundsd','ConfigurationController@Refundsd');
             $router->post('create', 'funding\FundingController@create');  
             $router->post('addfund', 'funding\FundingController@AdminAddFund');  
             $router->post('addfundsuperadmin', 'funding\FundingController@addfundsuperadmin');  
-            $router->post('transferfund', 'funding\FundingController@transferLoadfund');  
+            $router->post('transferfund', 'funding\FundingController@transferfund');  
             $router->post('approve', 'funding\FundingController@approve');  
             $router->post('getFundingRequestDetail', 'funding\FundingController@getFundingRequestDetail'); 
             $router->post('getlistfund','funding\FundingController@getpendingFund');
