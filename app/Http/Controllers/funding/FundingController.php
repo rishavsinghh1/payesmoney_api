@@ -736,7 +736,7 @@ class FundingController extends Controller
                     if($datum->status){
                         $dateTime = new DateTime($datum->depositeddate, new DateTimeZone('Asia/Kolkata'));  
                         
-                        $data[$key]->depositeddate =   $dateTime->format("d-m-Y"); 
+                         $data[$key]->depositeddate =   $dateTime->format("d-m-Y"); 
                        
                     } 
                 }
