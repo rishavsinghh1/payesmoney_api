@@ -60,7 +60,7 @@ class ManualProcessController extends Controller
                             'daterefunded' =>date('Y-m-d')
                         ];
                     $isupdate = Recharge::where('txnid', $info->txnid)->update($txnupdate);  
-                   // $isupdatecash = CashTransaction::where('id',$info->txnid)->update(['refunded' => 1]);
+                    $isupdatecash = CashTransaction::where('id',$info->txnid)->update(['refunded' => 1]);
 
                     $requestdata["txn_id"] = $info->txnid;
                     $requestdata["refundtxnid"] = $rechcredit['txnno'];

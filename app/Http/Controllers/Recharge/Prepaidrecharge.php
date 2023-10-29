@@ -40,6 +40,15 @@ class Prepaidrecharge extends Controller
                 $amount     =   $request->amount;
                 $unique     =   $request->referenceid; 
                 $operator   =   Rechargeoperator::select("*")->where("status",1)->where("op_id",$request->operator)->first(); 
+
+                $previousrecharge = RechargeTrait::previousrecharge($request['mobile'], $request['operator'], $request['amount']);
+                if ($previousrecharge > 0) { 
+                    $response = [
+                        'errors' => "invalid!",  
+                        "message" => "Same Transaction allowed after 5 min.", 
+                    ];
+                    return $this->response('notvalid', $response);  
+                }
                 $getunique = $unique;
                 if(!empty($getunique)){
                     if(!empty($operator)){

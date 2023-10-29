@@ -248,19 +248,22 @@ trait CommissionTrait
       return $return;
     }
 
-   public static function getclosing($where,$balance,$columname,$usertype){
+    public static function getclosing($where,$balance,$columname,$usertype){ 
       $query = DB::table('transaction_cashdeposit');
       $query->select($columname);
       $query->where($where); 
+      $query->where($columname, "!=", '""');
+      
+     
       if($usertype==5){
           $query->whereIn("ttype",self::walletttype('main'));  
       }else{
-          $query->whereIn("ttype",self::walletttype('main'));  
+          $query->whereIn("ttype",self::walletttype('main')); 
+          
       } 
       $query->orderBy('id', "desc"); 
       $query->take(1); 
       $return =   $query->get()->toArray(); 
-       
       if(isset($return[0])){
           if(round($return[0]->$columname) == round($balance)){
               return true;

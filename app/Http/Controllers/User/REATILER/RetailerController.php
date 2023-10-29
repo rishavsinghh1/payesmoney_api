@@ -14,6 +14,7 @@ use DateTime;
 use DateTimeZone;
 use Carbon\Carbon;
 use App\Models\UserPasswordDetails as UserPassword;
+use App\Libraries\Whatsapplib;
 class RetailerController extends Controller
 {
     
@@ -50,7 +51,7 @@ class RetailerController extends Controller
                 return $this->response('validatorerrors', $message);
             }
             
-            if ($userdata) {
+            if ($userdata) { 
                 if ($userdata->role == 4 || $userdata->role == 1) {
                     $valid = array("pannumber" => $request->pannumber, "usertype" => 4);
                     if ($request->userid != "") {
@@ -130,6 +131,14 @@ class RetailerController extends Controller
                                     $user_password->status     = 1;
                                     $user_password->save();
                                 $array = array("[name]" => $requestdata['fullname'], "[username]" => $username, "[password]" => $password);
+
+                                    $d=[
+                                        'api_token'=>'94d83070-4097-4409-938d-5b9583d037f4',
+                                        'mobile'=>'91'.$request->phone,
+                                        'message'=> urlencode("Account created. Your Username : " . $username . " & Password : " . $password)
+                                    ];
+                                    $data=  Whatsapplib::doSentMessage($d);  
+
                                 $response = [
                                     'message' => "Account created. Your Username : " . $username . " & Password : " . $password 
                                 ];
@@ -154,6 +163,12 @@ class RetailerController extends Controller
                         ];
                         return $this->response('notvalid', $response); 
                     }
+                }else{
+                    $response = [
+                        'errors' => "invalid!",
+                        'message' => "You Don't Have permission to create retailer"
+                    ];
+                    return $this->response('notvalid', $response);      
                 }
             } 
             

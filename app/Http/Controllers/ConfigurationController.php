@@ -24,6 +24,7 @@ class ConfigurationController extends Controller
     {
         //
           $this->mindate      =   date('Y-m-d', strtotime(date('Y-m-d') . ' -1day'));
+          // $this->mindate      =  '2023-08-16';
         $this->today      = Carbon::now()->toDateString();
     }
 
@@ -41,8 +42,6 @@ class ConfigurationController extends Controller
                 $message = $this->validationResponse($validator->errors());
                 return $this->response('validatorerrors', $message);
             }
-
-
         } catch (\Throwable $th) {
             //throw $th;
         }
@@ -50,7 +49,7 @@ class ConfigurationController extends Controller
 
 
     public function superdistributor(Request $request){  
-        $query = DB::select(("SELECT sdid,ttype, 
+        $query = DB::select(("SELECT id,ttype, 
         sum(if(refunded = 0,sdcomm,'')) as credit, 
         sum(if(refunded = 1,sdcomm,'')) as debit
         FROM `tbl_transaction_cashdeposit`
@@ -83,7 +82,8 @@ class ConfigurationController extends Controller
         FROM `tbl_transaction_cashdeposit`
         where did is NOT null 
         and date_format(`dateadded`,'%Y-%m-%d') >= '".$this->mindate."' and  dcomm > 0 GROUP BY did,ttype")); 
-        $totaldata = $query;   
+        $totaldata = $query; 
+       //  dd($totaldata);
         foreach($totaldata  as  $val){
             $commission  =  $val->credit; 
             $tds = 0;
@@ -111,7 +111,7 @@ class ConfigurationController extends Controller
         FROM `tbl_refund_transaction`
         where sdid is NOT null 
         and date_format(`addeddate`,'%Y-%m-%d') >= '".$this->mindate."' and  sdcomm > 0 GROUP BY sdid,ttype")); 
-        $totaldata = $query;    
+        $totaldata = $query;     
         foreach($totaldata  as  $val){
             $commission  =  $val->credit;
             $tds = 0;
@@ -137,8 +137,7 @@ class ConfigurationController extends Controller
         FROM `tbl_refund_transaction`
         where did is NOT null 
         and date_format(`addeddate`,'%Y-%m-%d') >= '".$this->mindate."' and  dcomm > 0 GROUP BY  did,ttype")); 
-        $totaldata = $query;    
-
+        $totaldata = $query;     
         foreach($totaldata  as  $val){
             $commission  =  $val->credit;
             $tds = 0;

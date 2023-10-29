@@ -71,16 +71,16 @@ class PayoutController extends Controller
     {
        
         $startdate     = trim(strip_tags($request->startdate));
-        $enddate       = trim(strip_tags($request->enddate));
-        $searchapi     = trim(strip_tags($request->searchapi)); 
+        $enddate       = trim(strip_tags($request->enddate));  
         $status        = trim(strip_tags($request->status));
         $userid        = trim(strip_tags($request->userid));
         $start         = trim(strip_tags($request->start));
         $length        = trim(strip_tags($request->length));
         $order         = trim(strip_tags($request->order)); 
-        $search        = trim(strip_tags($request->search));
-        $statename     = trim(strip_tags($request->statename));
+        $search        = trim(strip_tags($request->search)); 
         $operator     = trim(strip_tags($request->operator)); 
+         $searchby     = trim(strip_tags($request->searchby));
+        $searchvalue     = trim(strip_tags($request->searchvalue));
         if(empty($startdate) && empty($enddate)){
             $startdate = date('Y-m-d', strtotime("-30 days"));
             $enddate   = $this->today;  
@@ -117,9 +117,20 @@ class PayoutController extends Controller
                 'tb2.comm  as commcredit',
                 'recharge.updated_at as restime',
                 );  
-            $query->whereDate('recharge.addeddate', '>=', $startdate);
-            $query->whereDate('recharge.addeddate', '<=', $enddate);
-
+            
+            
+            if ($searchby != 'account') { 
+                $query->where(function ($q) use ($startdate, $enddate) {
+                    if (!empty($startdate) && !empty($enddate)) {
+                        $q->whereDate('recharge.addeddate', '>=', $startdate);
+                        $q->whereDate('recharge.addeddate', '<=', $enddate);
+                        //$q->whereRaw("date(recharge.addeddate) between '{$startdate}' and '{$enddate}'");
+                        // $q->whereRaw("date(recharge.addeddate) between '{$startdate}' and '{$enddate}'");
+                    }
+                    return $q;
+                });
+            }
+             
             if ($status != "" ) {
                 $query->where('recharge.status',$status);
             }
@@ -130,17 +141,33 @@ class PayoutController extends Controller
             
 
             (!empty($orderby) && !empty($order))? $query->orderBy('recharge.'.$orderby, $order): $query->orderBy("recharge.id", "desc");
-                $query->where(function ($q) use ($search) {
-                    if (!empty($search)) {
-                        $q->orWhere('recharge.canumber', 'LIKE', "%{$search}%");
-                        $q->orWhere('recharge.status', 'LIKE', "%{$search}%"); 
-                        $q->orWhere('recharge.reqid', 'LIKE', "%{$search}%");
-                        $q->orWhere('recharge.txnid', 'LIKE', "%{$search}%"); 
-                    }
-                    return $q;
-                });
             
-           
+             if ($searchby  != "" && $searchvalue != "") {
+                if ($searchby == 'txnid') {  
+                    $query->where('recharge.txnid', $searchvalue);
+                } else if ($searchby == 'liveid') { 
+                    $query->where('recharge.operatorid', $searchvalue);
+                } else if ($searchby == 'account') { 
+                    $query->where('recharge.canumber', $searchvalue);
+                } else if ($searchby == 'amount') { 
+                    $query->where('recharge.amount', $searchvalue);
+                } 
+                if ($searchby == 'username') {
+                    $query->where('users.username', $searchvalue);
+                } 
+                if ($searchby == 'order_id') {
+                    $query->where('recharge.refid', $searchvalue);
+                } 
+            } elseif ($searchvalue != "") {
+                $query->where(function ($query) use ($searchvalue) {
+                    $query->where('recharge.amount', 'like',  trim($searchvalue) . '%')
+                        ->orwhere('recharge.canumber', 'like', trim($searchvalue) . '%')
+                        ->orwhere('recharge.txnid', 'like',  trim($searchvalue) . '%') 
+                        ->orwhere('recharge.operatorid', 'like', trim($searchvalue) . '%')
+                        ->orwhere('recharge.username', 'like', trim($searchvalue) . '%')
+                        ->orwhere('recharge.refid', 'like', trim($searchvalue) . '%');   
+                });
+            } 
             if($request->user()->role == 3){
                 $userid =  $request->user()->id;
                 $query->where('users.supdistributor',$userid);
@@ -153,7 +180,9 @@ class PayoutController extends Controller
                 $userid =  $request->user()->id;
                 $query->where('users.id',$userid);
             }
-        
+            // if ($operator != "") {
+            //   $query->where('recharge.operatorname',$operator);
+            // }
            
             $totaldata = $query->get()->toArray();  
             $recordsTotal = $query->count(); 
@@ -331,6 +360,7 @@ class PayoutController extends Controller
         $enddate       = trim(strip_tags($request->enddate)); 
         $length        = trim(strip_tags($request->length));
         $userid        = trim(strip_tags($request->userid));
+        $userid_search = trim(strip_tags($request->userid_search));
         $status       = trim(strip_tags($request->status)); 
         $start = empty($startdate)? $this->today:$startdate;
         $end   = empty($enddate)? $this->today:$enddate;
@@ -343,6 +373,7 @@ class PayoutController extends Controller
             if($status == 1){
                 $request=  [DB::raw('tbl_recharge.operatorname as opname,COUNT(tbl_recharge.id) as totalcount, 
                 SUM(tbl_recharge.amount) as totalsale, 
+                SUM(tbl_recharge.amount + tbl_recharge.comm) as totalamt, 
                 SUM(tbl_recharge.comm)  as RTCOMM,
                 SUM(tbl_recharge.dcomm) as DISTCOMM,
                 SUM(tbl_recharge.sdcomm) as SDCOMM, 
@@ -355,6 +386,7 @@ class PayoutController extends Controller
                 $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,COUNT(tbl_recharge.id) as totalcount,tbl_recharge.operatorname as opname,tbl_recharge.addeddate as date')];
             }else{
                 $request=  [DB::raw('SUM(tbl_recharge.amount) as totalsale,
+                  SUM(tbl_recharge.amount + tbl_recharge.comm) as totalamt, 
                 COUNT(tbl_recharge.id) as totalcount,
                 tbl_recharge.operatorname as opname,
                 tbl_recharge.addeddate as date')];
@@ -365,6 +397,7 @@ class PayoutController extends Controller
             if($status == 1){
                 $request=  [DB::raw('tbl_recharge.operatorname as opname,COUNT(tbl_recharge.id) as totalcount, 
                 SUM(tbl_recharge.amount) as totalsale, 
+                SUM(tbl_recharge.amount + tbl_recharge.comm) as totalamt, 
                 SUM(tbl_recharge.comm)  as RTCOMM,
                 SUM(tbl_recharge.dcomm) as DISTCOMM,
                 SUM(tbl_recharge.sdcomm) as SDCOMM, 
@@ -382,6 +415,7 @@ class PayoutController extends Controller
             if($status == 1){
                 $request=  [DB::raw('tbl_recharge.operatorname as opname,COUNT(tbl_recharge.id) as totalcount, 
                 SUM(tbl_recharge.amount) as totalsale, 
+                  SUM(tbl_recharge.amount + tbl_recharge.comm) as totalamt, 
                 SUM(tbl_recharge.comm)  as RTCOMM,
                 SUM(tbl_recharge.dcomm) as DISTCOMM, 
                 SUM(tbl_recharge.comm)+SUM(tbl_recharge.dcomm) as totalcomm,
@@ -400,6 +434,7 @@ class PayoutController extends Controller
                 $request=  [DB::raw('tbl_recharge.operatorname as opname,COUNT(tbl_recharge.id) as totalcount, 
                 SUM(tbl_recharge.amount) as totalsale, 
                 SUM(tbl_recharge.comm)  as RTCOMM,  
+                  SUM(tbl_recharge.amount + tbl_recharge.comm) as totalamt, 
                 SUM(tbl_recharge.comm) as totalcomm,
                 SUM(tbl_recharge.amount) - (SUM(tbl_recharge.comm)) as salemcomm,
                 tbl_recharge.addeddate as date')];
@@ -407,13 +442,15 @@ class PayoutController extends Controller
                 $request=  [DB::raw('tbl_recharge.operatorname as opname,COUNT(tbl_recharge.id) as totalcount, 
                 SUM(tbl_recharge.amount) as totalsale, 
                 SUM(tbl_recharge.comm)  as RTCOMM,  
+                  SUM(tbl_recharge.amount + tbl_recharge.comm) as totalamt, 
                 SUM(tbl_recharge.comm) as totalcomm,
                 SUM(tbl_recharge.amount) - (SUM(tbl_recharge.comm)) as salemcomm,
                 tbl_recharge.addeddate as date')];
             }else{
                 $request=  [DB::raw('tbl_recharge.operatorname as opname,COUNT(tbl_recharge.id) as totalcount, 
                 SUM(tbl_recharge.amount) as totalsale, 
-                SUM(tbl_recharge.comm)  as RTCOMM,  
+                SUM(tbl_recharge.comm)  as RTCOMM, 
+                  SUM(tbl_recharge.amount + tbl_recharge.comm) as totalamt, 
                 SUM(tbl_recharge.comm) as totalcomm,
                 SUM(tbl_recharge.amount) - (SUM(tbl_recharge.comm)) as salemcomm,
                 tbl_recharge.addeddate as date')];
@@ -427,6 +464,10 @@ class PayoutController extends Controller
         // $query->whereDate('recharge.addeddate', '>=', $startdate);
         // $query->whereDate('recharge.addeddate', '<=', $enddate);  
             $query->where('recharge.status',$status); 
+            
+             if ($userid_search != "") {
+                $query->where('userid',$userid_search);
+             }
              $query->groupBy('operatorname');  
              $query->orderByRaw('COUNT("recharge.id") DESC');
              $recordsTotal = $query->count(); 
@@ -448,11 +489,13 @@ class PayoutController extends Controller
                 $totalcommission=0; 
                 $totalRTCOMM = 0;
                 $totalSDCOMM = 0;
+                $totalAMT = 0;
                 $totalDISTCOMM = 0;
                 foreach($data as $key=>$datum){  
                         $totalcount +=  $datum->totalcount;
                         $totalsale +=  $datum->totalsale; 
                                 $totalsalemcomm +=  $datum->salemcomm; 
+                                $totalAMT +=  $datum->totalamt; 
                                 $totalcommission +=  $datum->totalcomm;
                                 $totalRTCOMM += empty($datum->RTCOMM)?'0':$datum->RTCOMM;
                                 $totalSDCOMM += empty($datum->SDCOMM)?'0':$datum->SDCOMM;
@@ -471,7 +514,8 @@ class PayoutController extends Controller
                         'totalcommission'=>$totalcommission,
                         'totalrtcomm'=>$totalRTCOMM,
                         'totalsdcomm'=>$totalSDCOMM,
-                        'totaldistcomm'=>$totalDISTCOMM
+                        'totaldistcomm'=>$totalDISTCOMM,
+                         'totalamt'=>$totalAMT
                 ]
                 ]); 
             

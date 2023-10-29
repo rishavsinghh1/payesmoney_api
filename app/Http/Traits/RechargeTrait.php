@@ -9,10 +9,11 @@ use App\Models\CommissionTemplate;
 use App\Models\CommissionModel;
 use App\Models\Recharge;
 use App\Models\CashTransaction;
+use App\Models\Rechargeoperator;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash; 
 use Illuminate\Support\Facades\DB;
-
+use Carbon\Carbon;
 trait RechargeTrait
 {
     public static function process($reqData){
@@ -111,7 +112,7 @@ trait RechargeTrait
         $all  = array("0" => "Fund Transfer", "1" => "Fund Debit", "2" => "Fund Receiving", "3" => "Bank Charges", "4" => "Penny Drop", "5" => "DMT", "6" => "Recharge", "7" => "Bill Payment", "8" => "Wallet", "9" => "Credit Card", "10" => "Commission", "11" => "Cash To Main", "12" => "PG", "13" => "Pan Token", "100" => "AEPS Cashwithdrawal", "101" => "Aadhaar Pay", "102" => "Mini Statement", "103" => "Settlement", "104" => "Matm Cashwithdrawal");
         return $all[$type]; 
     }
-   public static function credit($req){ 
+    public static function credit($req){ 
         
         $return     =   array();
         if(isset($req['sid'])){ $stmtData['sid']=$req['sid']; }
@@ -173,5 +174,14 @@ trait RechargeTrait
         DB::unprepared("UNLOCK TABLES");
         return $return;
         
+    }
+
+    public static function previousrecharge($number,$op,$amt){
+        $getP   = Rechargeoperator::select('name')   
+           ->where('op_id',$op) 
+           ->first();   
+         
+       $info   = Recharge::where('canumber', $number)->where('amount', $amt)->where('status',1)->where('operatorname', $getP->name)->whereBetween('created_at', [Carbon::now()->subMinutes(5)->format('Y-m-d H:i:s'), Carbon::now()->format('Y-m-d H:i:s')])->count();
+        return $info;
     }
 }

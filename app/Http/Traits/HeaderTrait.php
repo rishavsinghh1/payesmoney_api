@@ -433,6 +433,7 @@ trait HeaderTrait
          $issort = 0;  
          $result[] = ['name'=>'opname','value'=>'OPNAME','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'totalcount','value'=>'COUNT','is_show'=>$isshow,'issort'=>0]; 
+         $result[] = ['name'=>'totalamt','value'=>'TOTAL AMOUNT','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'totalsale','value'=>'SALE','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'RTCOMM','value'=>'RT COMM','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'DISTCOMM','value'=>'DIST COMM','is_show'=>$isshow,'issort'=>0];
@@ -447,6 +448,7 @@ trait HeaderTrait
          $issort = 0;  
          $result[] = ['name'=>'opname','value'=>'OPNAME','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'totalcount','value'=>'COUNT','is_show'=>$isshow,'issort'=>0]; 
+         $result[] = ['name'=>'totalamt','value'=>'TOTAL AMOUNT','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'totalsale','value'=>'SALE','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'RTCOMM','value'=>'RT COMM','is_show'=>$isshow,'issort'=>0];  
          $result[] = ['name'=>'salemcomm','value'=>'SALE(-)COMMISSION','is_show'=>$isshow,'issort'=>0];    
@@ -458,6 +460,7 @@ trait HeaderTrait
          $issort = 0;  
          $result[] = ['name'=>'opname','value'=>'OPNAME','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'totalcount','value'=>'COUNT','is_show'=>$isshow,'issort'=>0]; 
+         $result[] = ['name'=>'totalamt','value'=>'TOTAL AMOUNT','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'totalsale','value'=>'SALE','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'RTCOMM','value'=>'RT COMM','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'DISTCOMM','value'=>'DIST COMM','is_show'=>$isshow,'issort'=>0];
@@ -472,6 +475,7 @@ trait HeaderTrait
          $issort = 0;  
          $result[] = ['name'=>'opname','value'=>'OPNAME','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'totalcount','value'=>'COUNT','is_show'=>$isshow,'issort'=>0]; 
+         $result[] = ['name'=>'totalamt','value'=>'TOTAL AMOUNT','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'totalsale','value'=>'SALE','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'RTCOMM','value'=>'RT COMM','is_show'=>$isshow,'issort'=>0];
          $result[] = ['name'=>'DISTCOMM','value'=>'DIST COMM','is_show'=>$isshow,'issort'=>0]; 

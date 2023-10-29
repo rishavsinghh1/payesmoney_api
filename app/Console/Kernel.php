@@ -14,6 +14,8 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         //
+        Commands\CopyDataCommand::class,
+        Commands\RecDataCommand::class,
     ];
 
     /**
@@ -24,6 +26,7 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        //
+        //$schedule->command('data:copy')->dailyAt('0:00');
+       // $schedule->command('queue:listen')->everyFifteenMinutes();
     }
 }
