@@ -160,6 +160,16 @@ $router->get('RefundDist','ConfigurationController@RefundDist');
 
             $router->post('refundReport', 'Reports\PayoutController@refundReport');
         }); 
+
+        //DMT
+        $router->group(['prefix' => 'dmt'], function () use ($router) { 
+            $router->post('getremitter', 'Dmt\RemitterController@getremitter'); 
+            $router->post('register-remitter', 'Dmt\RemitterController@registerremitter'); 
+            $router->post('remitterotp', 'Dmt\RemitterController@remitterotp'); 
+            
+            
+        }); 
+
         $router->group(['prefix' => 'manual'], function () use ($router) { 
             $router->post('updateSucesstoFailedRec', 'Recharge\ManualProcessController@updateSucesstoFailedRec'); 
         }); 
