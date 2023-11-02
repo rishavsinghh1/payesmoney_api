@@ -166,6 +166,9 @@ $router->get('RefundDist','ConfigurationController@RefundDist');
             $router->post('getremitter', 'Dmt\RemitterController@getremitter'); 
             $router->post('register-remitter', 'Dmt\RemitterController@registerremitter'); 
             $router->post('remitterotp', 'Dmt\RemitterController@remitterotp'); 
+            $router->post('remitterlogin', 'Dmt\RemitterController@remitterlogin'); 
+            $router->post('changempin', 'Dmt\RemitterController@changempin'); 
+            $router->post('resendmpin', 'Dmt\RemitterController@resendmpin'); 
             
             
         }); 

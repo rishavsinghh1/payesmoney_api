@@ -19,6 +19,7 @@ class RemitterController extends Controller
 {
     use CommonTrait,HeaderTrait,ChargesTrait;
     public function __construct(){
+        $this->authcode =   '222111';
         $this->status = ['0'=>'Deactive','1'=>'Active'];
     } 
 
@@ -247,11 +248,12 @@ class RemitterController extends Controller
                 return $this->response('validatorerrors', $message);
             }
             $userdata = Auth::user(); 
+          
             if ($userdata && in_array($userdata->role, array(5))) {
                 $mobile =$request->mobile;
                 $getcustomer = Depositor::select("*")->where("mobile",$mobile)->first(); 
                 if(!empty($getcustomer)){
-
+                   $sent =  self::sendotp(array("mobile"=>$mobile,"userid"=>$userdata->id,"name"=>$userdata->fullname));
                     $response = [
                         'response' => 1, 
                         'statuscode' => 200,
@@ -280,15 +282,212 @@ class RemitterController extends Controller
         }
     }
 
-    public function sendotp($reqData){
-        $result = Remitterauth::select("*")->where("mobile",$mobile)->where("is_used","0")->first();  
-        if(!empty($result)){
-            $array  =   array("[otp]"=>$result['authcode'],"[pin]"=>$reqData['pin']);
-            $this->common->createsms(array("number" => $reqData['mobile'],"userid" => $reqData['userid'], "message" => $array,"template"=>$reqData['template']));
+    public function remitterlogin(Request $request){
+        try {
+            $validated = Validator::make($request->all(), [  
+                "mobile"      => 'required|digits:10|numeric',  
+                "otp"         => 'required|numeric',  
+            ]);
+            if ($validated->fails()) {
+                $message   = $this->validationResponse($validated->errors());
+                return $this->response('validatorerrors', $message);
+            }
+            $userdata = Auth::user(); 
+            if ($userdata && in_array($userdata->role, array(5))) {
+                $mobile =$request->mobile;
+                $otp =$request->otp;
+                if(strlen($otp) == 4){
+                    $getcustomer = Depositor::select('*')->where('mobile',$mobile)->where('mempin',$otp)->first();
+                    $data = [];
+                    if(!empty($getcustomer)){
+                        $data['depositorid'] = $getcustomer['id'];
+                        $data['mobile'] = $getcustomer['mobile'];
+
+                        $response = [
+                            'status' => true,
+                            'statuscode' => 200,
+                            'data' =>$data,
+                            'message'=> "Remitter logged In success."
+                        ];
+                        return $this->response('success', $response);  
+                    }else{
+                        $response = [
+                            'status' => false,
+                            'statuscode' => 2001,
+                            'message' => "Invalid MPIN."
+                        ]; 
+                    }    
+                }else{
+                    $result = Remitterauth::select("*")->where("mobile",$mobile)->where("authcode",$otp)->where("is_used","0")->first();   
+                    if (!empty($result)) { 
+                        $getcustomer = Depositor::select('*')->where('mobile',$mobile)->where('creator',$result['userid'])->first();
+                        $data['depositorid'] = $getcustomer['id'];
+                        $data['mobile'] = $getcustomer['mobile'];
+                        $response = [
+                            'status' => true,
+                            'statuscode' => 200,
+                            'data' =>$data,
+                            'message'=> "Remitter logged In success."
+                        ];
+                        return $this->response('success', $response);   
+                    }else{
+                        $response = [
+                            'status' => false,
+                            'statuscode' => 2001
+                        ];
+                        return $this->response('notvalid', $response);  
+                    }     
+                }
+            }else { 
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "Not Authorised!!"
+                ];
+                return $this->response('notvalid', $response); 
+            }
+        }catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]);
+        }
+          
+    }
+
+    public function changempin(Request $request){
+        try {
+            $validated = Validator::make($request->all(), [  
+                "mobile"      => 'required|digits:10|numeric',  
+                "oldpin"         => 'required|numeric',  
+                "newpin"         => 'required|numeric',  
+            ]);
+            if ($validated->fails()) {
+                $message   = $this->validationResponse($validated->errors());
+                return $this->response('validatorerrors', $message);
+            }
+            $userdata = Auth::user(); 
+            $mobile     =   $request->mobile;
+            $oldpin     =   $request->oldpin;
+            $newpin     =   $request->newpin;
+            if ($userdata && in_array($userdata->role, array(5))) {  
+                $getcustomer = Depositor::select('*')->where('mobile',$mobile)->where('mempin',$oldpin)->first();
+                if($getcustomer){  
+                    if($oldpin  ==  $getcustomer['mempin']) {
+                        $isupdate = Depositor::where("mobile",$mobile)->where("id",$getcustomer['id'])->update(array("mempin"=>$newpin));  
+                        if($isupdate){
+                            $d=[
+                                'api_token'=>'94d83070-4097-4409-938d-5b9583d037f4',
+                                'mobile'=>'91'.$mobile,
+                                'message'=> urlencode( 
+                                    "Dear " . $getcustomer['fname'] .' '.$getcustomer['lname'].", your PIN has been successfully changed.Please report immediately unauthorised access to customer care. Powered by Payesmoney") 
+                            ];
+                            $data=  Whatsapplib::doSentMessage($d);
+                            $response = [
+                                'status' => true,
+                                'statuscode' => 200, 
+                                'message'=> "Remitter PIN has been changed."
+                            ];
+                            return $this->response('success', $response);   
+                        }else{
+                            $response = [
+                                'status' => false,
+                                'statuscode' => 2001,
+                                'message' => "Unable to change remitter MPIN"
+                            ];
+                            return $this->response('notvalid', $response);  
+                        }
+                    }else{
+                        $response = [
+                            'status' => false,
+                            'statuscode' => 2001,
+                            'message' => "Remitter PIN does not match."
+                        ];
+                        return $this->response('notvalid', $response);   
+                    }
+                }else{
+                    $response = [
+                        'status' => false,
+                        'statuscode' => 2001,
+                        'message' => "Remitter not found"
+                    ];
+                    return $this->response('notvalid', $response);    
+                }
+
+            }else { 
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "Not Authorised!!"
+                ];
+                return $this->response('notvalid', $response); 
+            }
+        }catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]);
+        } 
+    }
+
+    public function resendmpin(Request $request){
+        try {
+            $validated = Validator::make($request->all(), [  
+                "mobile"      => 'required|digits:10|numeric',   
+            ]);
+            if ($validated->fails()) {
+                $message   = $this->validationResponse($validated->errors());
+                return $this->response('validatorerrors', $message);
+            }
+            $userdata = Auth::user(); 
+            $mobile     =   $request->mobile; 
+            if ($userdata && in_array($userdata->role, array(5))) {  
+                $getcustomer = Depositor::select('*')->where('mobile',$mobile)->first();
+                if($getcustomer){  
+                    $d=[
+                        'api_token'=>'94d83070-4097-4409-938d-5b9583d037f4',
+                        'mobile'=>'91'.$getcustomer['mobile'],
+                        'message'=> urlencode( 
+                            "Dear " . $getcustomer['fname'] .' '.$getcustomer['lname'].", your MPIN for future use is ". $getcustomer['mempin']." Powered by Payesmoney") 
+                    ];
+                    $data=  Whatsapplib::doSentMessage($d);
+                    $response = [
+                        'status' => true,
+                        'statuscode' => 200, 
+                        'message'=> "Mpin successfully sent to remitter mobile number"
+                    ];
+                    return $this->response('success', $response);  
+                }else{
+                    $response = [
+                        'status' => false,
+                        'statuscode' => 2001,
+                        'message' => "Remitter not found "
+                    ];
+                    return $this->response('notvalid', $response);    
+                }
+            }else { 
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "Not Authorised!!"
+                ];
+                return $this->response('notvalid', $response); 
+            }
+        }catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]);
+        } 
+    }
+    public function sendotp($reqData){ 
+        $result = Remitterauth::select("*")->where("mobile",$reqData['mobile'])->where("is_used","0")->first();  
+        if(!empty($result)){ 
+            $d=[
+                'api_token'=>'94d83070-4097-4409-938d-5b9583d037f4',
+                'mobile'=>'91'.$reqData['mobile'],
+                'message'=> urlencode("Dear " . $reqData['name'] . " Please provide " .$this->authcode."  as OTP to confirm registration for MoneyTransfer.  Powered by Payesmoney")
+            ];
+            $data=  Whatsapplib::doSentMessage($d);
+            //$this->common->createsms(array("number" => $reqData['mobile'],"userid" => $reqData['userid'], "message" => $array,"template"=>$reqData['template']));
         }else{
-            $array  =   array("[otp]"=>$this->authcode,"[pin]"=>$reqData['pin']);
-            $this->imps->insertdata("remitterauth",array("userid"=>$reqData['userid'],"mobile"=>$reqData['mobile'],"authcode"=>$this->authcode));
-           $this->common->createsms(array("number" => $reqData['mobile'],"userid" => $reqData['userid'],"pin"=>$reqData['pin'], "message" => $array,"template"=>$reqData['template']));
+            $array  =  array("userid"=>$reqData['userid'],"mobile"=>$reqData['mobile'],"authcode"=>$this->authcode);
+            $getcustomer = Remitterauth::insertGetId($array); 
+           //$this->common->createsms(array("number" => $reqData['mobile'],"userid" => $reqData['userid'],"pin"=>$reqData['pin'], "message" => $array,"template"=>$reqData['template']));
+           $d=[
+            'api_token'=>'94d83070-4097-4409-938d-5b9583d037f4',
+            'mobile'=>'91'.$reqData['mobile'],
+            'message'=> urlencode("Dear " . $reqData['name'] . "Please provide " .$this->authcode."  as OTP to confirm registration for MoneyTransfer.  Powered by Payesmoney")
+        ];
+        $data=  Whatsapplib::doSentMessage($d);
         }
         return true;
     }
