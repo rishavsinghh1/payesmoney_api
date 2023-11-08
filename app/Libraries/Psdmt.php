@@ -93,8 +93,43 @@ class Psdmt{
         ]; 
        return self::hitting($data);
     }
-    
 
+    public static function fetchbeneficiary($request){ 
+        $data = [
+            'method' => 'POST', 
+            'apiname'=> 'fetchbeneficiary',
+            'url'    => static::$liveurl.'dmt/fetchbeneficiary', 
+            'parameter' => [ 
+                    'mobile'    => $request['mobile'], 
+                    'reqId'     =>  self::randString(14)        
+            ]
+           
+        ]; 
+       return self::hitting($data);
+    }
+    public static function registerbeneficiary($request){ 
+        $data = [
+            'method' => 'POST', 
+            'apiname'=> 'registerbeneficiary',
+            'url'    => static::$liveurl.'dmt/registerbeneficiary', 
+            'parameter' => [ 
+                    'mobile'        => $request['mobile'], 
+                    'benename'      => $request['benename'], 
+                    'bankid'        => $request['bankid'], 
+                    'accno'         => $request['accno'], 
+                    'ifsccode'      => $request['ifsccode'], 
+                    'verified'      => $request['verified'], 
+                    'gst_state'     => $request['gst_state'], 
+                    'dob'           => $request['dob'], 
+                    'address'       => $request['address'], 
+                    'pincode'       => $request['pincode'], 
+                    'reqId'         =>  self::randString(14)        
+            ]
+           
+        ]; 
+       
+       return self::hitting($data);
+    } 
     public static function randString($length, $charset='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
     {
         $str = '';

@@ -22,9 +22,7 @@ class RemitterController extends Controller
         $this->authcode =   '222111';
         $this->status = ['0'=>'Deactive','1'=>'Active'];
     } 
-
-    public function getremitter(Request $request)
-    {
+    public function getremitter(Request $request){
         try {
             $validated = Validator::make($request->all(), [  
                 "mobile"      => 'required|digits:10|numeric',  
@@ -148,10 +146,8 @@ class RemitterController extends Controller
         }catch (\Throwable $th) {
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
-    }
-
-    public function registerremitter(Request $request)
-    {
+    } 
+    public function registerremitter(Request $request){
         try {
             $validated = Validator::make($request->all(), [  
                 "mobile"        => 'required|digits:10|numeric', 
@@ -235,10 +231,8 @@ class RemitterController extends Controller
         }catch (\Throwable $th) {
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
-    }
-    
-    public function remitterotp(Request $request)
-    {
+    } 
+    public function remitterotp(Request $request){
         try {
             $validated = Validator::make($request->all(), [  
                 "mobile"      => 'required|digits:10|numeric',  
@@ -280,8 +274,7 @@ class RemitterController extends Controller
         }catch (\Throwable $th) {
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
-    }
-
+    } 
     public function remitterlogin(Request $request){
         try {
             $validated = Validator::make($request->all(), [  
@@ -349,8 +342,7 @@ class RemitterController extends Controller
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         }
           
-    }
-
+    } 
     public function changempin(Request $request){
         try {
             $validated = Validator::make($request->all(), [  
@@ -420,8 +412,7 @@ class RemitterController extends Controller
         }catch (\Throwable $th) {
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         } 
-    }
-
+    } 
     public function resendmpin(Request $request){
         try {
             $validated = Validator::make($request->all(), [  
@@ -468,6 +459,80 @@ class RemitterController extends Controller
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
         } 
     }
+    public function generateotp(Request $request){
+        try {
+            $validated = Validator::make($request->all(), [  
+                "mobile"      => 'required|digits:10|numeric',   
+            ]);
+            if ($validated->fails()) {
+                $message   = $this->validationResponse($validated->errors());
+                return $this->response('validatorerrors', $message);
+            }
+            $userdata = Auth::user(); 
+            $mobile     =   $request->mobile; 
+            if ($userdata && in_array($userdata->role, array(5))) {  
+                $mobile     =   $request->mobile; 
+                
+                $sendotp = Psdmt::doqueryremitter(array("mobile" => $mobile));
+                if($sendotp['response_code']==2){
+                    $response = [
+                        'status' => true,
+                        'statuscode' => 200, 
+                         'stateresp' => $sendotp['stateresp'],
+                        'message'=> "Mpin successfully sent to remitter mobile number"
+                    ];
+                    return $this->response('success', $response);   
+                }else{
+                    $response = [
+                        'errors' => "invalid!",
+                        'statuscode'=>2001,
+                        'message' => "Unable to send OTP at the moment Please try again after sometime"
+                    ];
+                    return $this->response('notvalid', $response); 
+                }
+            }else { 
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "Not Authorised!!"
+                ];
+                return $this->response('notvalid', $response); 
+            }
+        }catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]);
+        } 
+    } 
+    public function  getgststate(Request $request){
+        try { 
+            $userdata = Auth::user();  
+            if ($userdata && in_array($userdata->role, array(5))) {  
+                $gststate = gststate::select('stateId','statename')->get();
+                if($gststate){ 
+                $response = [
+                    'status' => true,
+                    'statuscode' => 200, 
+                    'data' => $gststate,
+                    'message'=> "Data Feteched!!"
+                ];
+                return $this->response('success', $response);   
+            }else{
+                $response = [
+                    'errors' => "invalid!",
+                    'statuscode'=>2001,
+                    'message' => "Something went wrong!!!"
+                ];
+                return $this->response('notvalid', $response); 
+            }
+            }else { 
+                $response = [
+                    'errors' => "invalid!",
+                    'message' => "Not Authorised!!"
+                ];
+                return $this->response('notvalid', $response); 
+            }
+        }catch (\Throwable $th) {
+            return $this->response('internalservererror', ['message' => $th->getMessage()]);
+        } 
+    }
     public function sendotp($reqData){ 
         $result = Remitterauth::select("*")->where("mobile",$reqData['mobile'])->where("is_used","0")->first();  
         if(!empty($result)){ 
@@ -490,6 +555,5 @@ class RemitterController extends Controller
         $data=  Whatsapplib::doSentMessage($d);
         }
         return true;
-    }
-    
+    } 
 }

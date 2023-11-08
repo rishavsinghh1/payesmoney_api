@@ -163,13 +163,27 @@ $router->get('RefundDist','ConfigurationController@RefundDist');
 
         //DMT
         $router->group(['prefix' => 'dmt'], function () use ($router) { 
-            $router->post('getremitter', 'Dmt\RemitterController@getremitter'); 
-            $router->post('register-remitter', 'Dmt\RemitterController@registerremitter'); 
-            $router->post('remitterotp', 'Dmt\RemitterController@remitterotp'); 
-            $router->post('remitterlogin', 'Dmt\RemitterController@remitterlogin'); 
-            $router->post('changempin', 'Dmt\RemitterController@changempin'); 
-            $router->post('resendmpin', 'Dmt\RemitterController@resendmpin'); 
-            
+            $router->group(['prefix' => 'remitter'], function () use ($router) {  
+                $router->post('getremitter', 'Dmt\RemitterController@getremitter'); 
+                $router->post('register-remitter', 'Dmt\RemitterController@registerremitter'); 
+                $router->post('remitterotp', 'Dmt\RemitterController@remitterotp'); 
+                $router->post('remitterlogin', 'Dmt\RemitterController@remitterlogin'); 
+                $router->post('changempin', 'Dmt\RemitterController@changempin'); 
+                $router->post('resendmpin', 'Dmt\RemitterController@resendmpin'); 
+                $router->post('generateotp', 'Dmt\RemitterController@generateotp');  
+                $router->post('getgststate', 'Dmt\RemitterController@getgststate'); 
+            });   
+            $router->group(['prefix' => 'bene'], function () use ($router) {  
+                $router->post('benelist', 'Dmt\BeneController@benelist');  
+                $router->post('banklist', 'Dmt\BeneController@banklist');  
+                $router->post('addreceiver', 'Dmt\BeneController@addreceiver');  
+                
+            }); 
+            $router->group(['prefix' => 'transaction'], function () use ($router) {  
+                $router->post('initiate', 'Dmt\TransactionController@initiate');
+                $router->post('dotransaction', 'Dmt\TransactionController@dotransaction'); 
+                
+            });   
             
         }); 
 
