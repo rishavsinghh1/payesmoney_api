@@ -36,98 +36,96 @@ class RemitterController extends Controller
                 $mobile =$request->mobile;
                 $frm    = frm::select("*")->where("status",1)->where("frm_details",$mobile)->first();  
                 if(empty($frm)){
-                    $getDetailRetailer = Psdmt::doqueryremitter(array("mobile" => $mobile));  
-                    //dd($getDetailRetailer);
-                    if($getDetailRetailer['response_code']==1 && $getDetailRetailer['status'] == true){
-                        $getcustomer = Depositor::select("*")->where("mobile",$mobile)->first(); 
-                        if (!empty($getcustomer)) {
-                            $ps_limit    =   $getDetailRetailer['DMT1_limit'];
-                            $ps_limit_2    =   $getDetailRetailer['DMT2_limit'];
-                            $ps_limit_3    =   $getDetailRetailer['DMT3_limit']; 
-                            if($ps_limit < $getcustomer['limit'] || $ps_limit_2 < $getcustomer['limit_2']  || $ps_limit_3 < $getcustomer['limit_3']){
-                                $limit  =    $ps_limit;
-                                $limit2  =   $ps_limit_2;
-                                $limit3  =   $ps_limit_3;
-                                if($limit > 0){
-                                    $isupdate = Depositor::where("mobile",$mobile)->update(array("fname"=>$getDetailRetailer['fname'],"lname"=>$getDetailRetailer['lname'],"limit" => $limit
-                                    ,"limit_2" => $limit2,"limit_3" => $limit3));
+                    $getDetailRetailer = Psdmt::doqueryremitter(array("mobile" => $mobile));   
+                        if($getDetailRetailer['response_code']==1 && $getDetailRetailer['status'] == true){
+                            $getcustomer = Depositor::select("*")->where("mobile",$mobile)->first(); 
+                            if (!empty($getcustomer)) {
+                                $ps_limit    =   $getDetailRetailer['DMT1_limit'];
+                                $ps_limit_2    =   $getDetailRetailer['DMT2_limit'];
+                                $ps_limit_3    =   $getDetailRetailer['DMT3_limit']; 
+                                if($ps_limit < $getcustomer['limit'] || $ps_limit_2 < $getcustomer['limit_2']  || $ps_limit_3 < $getcustomer['limit_3']){
+                                    $limit  =    $ps_limit;
+                                    $limit2  =   $ps_limit_2;
+                                    $limit3  =   $ps_limit_3;
+                                    if($limit > 0){
+                                        $isupdate = Depositor::where("mobile",$mobile)->update(array("fname"=>$getDetailRetailer['fname'],"lname"=>$getDetailRetailer['lname'],"limit" => $limit
+                                        ,"limit_2" => $limit2,"limit_3" => $limit3));
+                                    }
+                                }else{
+                                    $isupdate = Depositor::where("mobile",$mobile)->update(array("fname"=>$getDetailRetailer['fname'],"lname"=>$getDetailRetailer['lname']));
+                                    $limit  =   $getcustomer['limit'];
+                                    $limit2  =   $getcustomer['limit_2'];
+                                    $limit3  =   $getcustomer['limit_3'];
                                 }
-                            }else{
-                                $isupdate = Depositor::where("mobile",$mobile)->update(array("fname"=>$getDetailRetailer['fname'],"lname"=>$getDetailRetailer['lname']));
-                                $limit  =   $getcustomer['limit'];
-                                $limit2  =   $getcustomer['limit_2'];
-                                $limit3  =   $getcustomer['limit_3'];
+                                    $response = [
+                                        'message' => "Remitter account details fetched",
+                                        'fname'=> $getDetailRetailer['fname'],
+                                        'lname'=> $getDetailRetailer['lname'],
+                                        'DMT1_limit'=>$getDetailRetailer['DMT1_limit'],
+                                        'DMT2_limit'=> $getDetailRetailer['DMT2_limit'],
+                                        'DMT3_limit'=>$getDetailRetailer['DMT3_limit'],
+                                        'mobile'=>$request->mobile,
+                                        'statuscode'=>200
+                                    ];
+                                return $this->response('success', $response);  
+                            } else {
+                                $mpin= rand(1111,9999);
+                                $min = strtotime("47 years ago");
+                                $max = strtotime("18 years ago");
+                                $rand_time = mt_rand($min, $max);
+                                $birth_date = date('Y-m-d', $rand_time);
+                            
+                                $reqData   =  array( 
+                                    "mempin"    =>  $mpin,
+                                    "creator"   =>  $userdata->id,
+                                    "fname"     =>  $getDetailRetailer['fname'],
+                                    "lname"     =>  $getDetailRetailer['lname'],
+                                    "dob"       =>  $birth_date, 
+                                    "mobile"    =>  $mobile, 
+                                    "address"   =>  'Noida',
+                                    "status"    =>  1,
+                                    "limit"     =>  $getDetailRetailer['DMT1_limit'],
+                                    "limit_2"     =>  $getDetailRetailer['DMT2_limit'],
+                                    "limit_3"     =>  $getDetailRetailer['DMT3_limit']
+                                );  
+                                $insertdata = Depositor::insertGetId($reqData); 
+                                if($insertdata){
+                                    $d=[
+                                        'api_token'=>'94d83070-4097-4409-938d-5b9583d037f4',
+                                        'mobile'=>'91'.$mobile,
+                                        'message'=> urlencode("Dear " . $userdata->fullname . " You have been successfully registered with Payesmoney.Your MPIN is " . $reqData['mempin'] ."    Powered by Payesmoney")
+                                    ];
+                                    $data=  Whatsapplib::doSentMessage($d);
+                                    //$this->sendotpmpin(array("userid"=>$this->valid_user['userid'],"mobile"=>$mobile,"name"=>$reqData['fname'],"pin"=>$this->pin,"template"=>"remitterPin"));
+                                            
+                                    $response = [
+                                        'message' => "Remitter account created successfully !",
+                                        'fname'=> $getDetailRetailer['fname'],
+                                        'lname'=> $getDetailRetailer['lname'],
+                                        'DMT1_limit'=>$getDetailRetailer['DMT1_limit'],
+                                        'DMT2_limit'=> $getDetailRetailer['DMT2_limit'],
+                                        'DMT3_limit'=>$getDetailRetailer['DMT3_limit'],
+                                        'mobile'=>$request->mobile,
+                                        'statuscode'=>201
+                                    ];
+                                return $this->response('success', $response); 
+                                }
                             }
-                                $response = [
-                                    'message' => "Remitter account details fetched",
-                                    'fname'=> $getDetailRetailer['fname'],
-                                    'lname'=> $getDetailRetailer['lname'],
-                                    'DMT1_limit'=>$getDetailRetailer['DMT1_limit'],
-                                    'DMT2_limit'=> $getDetailRetailer['DMT2_limit'],
-                                    'DMT3_limit'=>$getDetailRetailer['DMT3_limit'],
-                                    'mobile'=>$request->mobile,
-                                    'statuscode'=>200
-                                ];
-                            return $this->response('success', $response);  
-                        } else {
-                            $mpin= rand(1111,9999);
-                            $min = strtotime("47 years ago");
-                            $max = strtotime("18 years ago");
-                            $rand_time = mt_rand($min, $max);
-                            $birth_date = date('Y-m-d', $rand_time);
-                           
-                            $reqData   =  array( 
-                                "mempin"    =>  $mpin,
-                                "creator"   =>  $userdata->id,
-                                "fname"     =>  $getDetailRetailer['fname'],
-                                "lname"     =>  $getDetailRetailer['lname'],
-                                "dob"       =>  $birth_date, 
-                                "mobile"    =>  $mobile, 
-                                "address"   =>  'Noida',
-                                "status"    =>  1,
-                                "limit"     =>  $getDetailRetailer['DMT1_limit'],
-                                "limit_2"     =>  $getDetailRetailer['DMT2_limit'],
-                                "limit_3"     =>  $getDetailRetailer['DMT3_limit']
-                            );  
-                            $insertdata = Depositor::insertGetId($reqData); 
-                            if($insertdata){
-                                $d=[
-                                    'api_token'=>'94d83070-4097-4409-938d-5b9583d037f4',
-                                    'mobile'=>'91'.$mobile,
-                                    'message'=> urlencode("Dear " . $userdata->fullname . " You have been successfully registered with Payesmoney.Your MPIN is " . $reqData['mempin'] ."    Powered by Payesmoney")
-                                ];
-                                $data=  Whatsapplib::doSentMessage($d);
-                                //$this->sendotpmpin(array("userid"=>$this->valid_user['userid'],"mobile"=>$mobile,"name"=>$reqData['fname'],"pin"=>$this->pin,"template"=>"remitterPin"));
-                                        
-                                $response = [
-                                    'message' => "Remitter account created successfully !",
-                                    'fname'=> $getDetailRetailer['fname'],
-                                    'lname'=> $getDetailRetailer['lname'],
-                                    'DMT1_limit'=>$getDetailRetailer['DMT1_limit'],
-                                    'DMT2_limit'=> $getDetailRetailer['DMT2_limit'],
-                                    'DMT3_limit'=>$getDetailRetailer['DMT3_limit'],
-                                    'mobile'=>$request->mobile,
-                                    'statuscode'=>201
-                                ];
-                            return $this->response('success', $response); 
-                            }
-                        }
-                    }elseif($getDetailRetailer['status'] == true && $getDetailRetailer['response_code'] == 0 and isset($getDetailRetailer['stateresp'])){
-                        $response = [
-                            'message' => "An OTP has been sent to remitter mobile number.",
-                            'remrecord'=> 0, 
-                            'mobile'   =>$mobile, 
-                            'statuscode'=>203,
-                            'stateresp'=> $getDetailRetailer['stateresp'], 
-                        ]; 
-                        return $this->response('success', $response);
-                    }else{
-                        $response = [
-                            'errors' => "invalid!",
-                            'message' => $getDetailRetailer['message']
-                        ];
-                        return $this->response('notvalid', $response);  
-                    }  
+                        }elseif($getDetailRetailer['status'] == true && $getDetailRetailer['response_code'] == 0 and isset($getDetailRetailer['stateresp'])){
+                            $response = [
+                                'message' => "An OTP has been sent to remitter mobile number.",
+                                'remrecord'=> 0, 
+                                'mobile'   =>$mobile, 
+                                'statuscode'=>203,
+                                'stateresp'=> $getDetailRetailer['stateresp'], 
+                            ]; 
+                            return $this->response('success', $response);
+                        }else{ 
+                            $response = [ 
+                                'message' => $getDetailRetailer['message']
+                            ];
+                            return $this->response('notvalid', $response);  
+                        } 
                 }else{
                     $response = [
                         'errors' => "invalid!",

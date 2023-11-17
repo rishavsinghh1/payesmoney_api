@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\CommissionTemplate;
 use App\Models\CommissionModel;
 use App\Models\Recharge;
+use App\Models\Dmttransfer;
 use App\Models\CashTransaction;
 use App\Models\Rechargeoperator;
 use App\Models\User;
@@ -89,7 +90,8 @@ trait RechargeTrait
         $all = array(
             "ADMIN"=>20231002,
             "SUPERADMIN"=>20231001,
-            "DATE"=>date('Y-m-d')
+            "DATE"=>date('Y-m-d'), 
+            "api_charge"=>array("PSPRINT"=>"3.50")
         );  
         return $all[$type]; 
     } 
@@ -184,4 +186,149 @@ trait RechargeTrait
        $info   = Recharge::where('canumber', $number)->where('amount', $amt)->where('status',1)->where('operatorname', $getP->name)->whereBetween('created_at', [Carbon::now()->subMinutes(5)->format('Y-m-d H:i:s'), Carbon::now()->format('Y-m-d H:i:s')])->count();
         return $info;
     }
+
+
+    public static function dmtprocess($reqData){
+
+        $txnData    =   array();
+        $return     =   array();
+        $txnData['userid']       =   $reqData['uid'];
+        $txnData['depositorid']  =   $reqData['depositorid'];
+        $txnData['beneid']       =   $reqData['receiverid'];
+        $txnData['bankid']       =   $reqData['bankid'];
+        $txnData['bankname']     =   $reqData['bankname'];
+        $txnData['acno']         =   $reqData['acno'];
+        $txnData['benename']     =   $reqData['benename'];
+        $txnData['mobile']       =   $reqData['mobile'];
+        $txnData['amount']       =   $reqData['amount'];
+        $txnData['pipe']         =   $reqData['pipe'];
+        $txnData['charges']      =   $reqData['acharges'];
+       // $txnData['profit']       =   ($reqData['acharges']-$this->api_charge[$reqData['api_type']]);
+        $txnData['transfertype'] =   $reqData['dmrtype'];
+        $txnData['ifsccode']     =   $reqData['ifsc'];
+        $txnData['apitype']      =   $reqData['api_type'];
+        $txnData['status']       =   2;
+        $txnData['addeddate']    =   date('Y-m-d');
+        $txnData['refid']        =   $reqData['unicode'];
+        $gstCal                  =   self::calgst(array("amount"=>$reqData['amount'],"rnficharge"=>$reqData['acharges'])); 
+        $agcharges                  =   $gstCal['rnficharge'];
+        $txnData['customercharge']  =   $gstCal['customercharge'];
+        $txnData['gst']             =   $gstCal['gst'];
+        $txnData['discount']        =   0;
+        $txnData['tds']             =   $gstCal['tds'];
+        $txnData['netcommission']   =   $gstCal['apinetaftertds'];
+        
+        $stmtData['sid']         =  self::GetuserId('SUPERADMIN');
+        $stmtData['uid']         =   $reqData['uid'];
+        $stmtData['did']         =   $reqData['did'];  
+        $stmtData['sdid']        =   $reqData['sdid'];
+        $stmtData['amount']      =   $reqData['amount'];
+        $stmtData['comm']        =   $reqData['acharges']; 
+        $stmtData['dcomm']       =   $reqData['dcharges'];  
+        $stmtData['sdcomm']      =   $reqData['scharges']; 
+        $stmtData['customercharge']  =   $gstCal['customercharge']; 
+        $stmtData['utype']          =   'debit';
+        $stmtData['sdtype']         =   'credit';
+        $stmtData['dtype']          =   'credit';
+        $stmtData['narration']   =   "Amount Rs.".$reqData['amount']." Transfer to Acno : ".$reqData['acno']." name of ".$reqData['benename'];
+        $stmtData['ttype']       =   5;
+        $stmtData['addeddate']   =   date('Y-m-d');
+        // $stmtData['ipaddress']   =   $reqData['ipaddress'];
+        $stmtData['tds']         =   $gstCal['tds'];
+        $stmtData['gst']         =   $gstCal['gst'];
+        $agentcl	=	$reqData['amount']+ $gstCal['txncost'];  
+        $wttype = self::wttype('main'); 
+        DB::unprepared("LOCK TABLES tbl_transaction_cashdeposit as t READ,tbl_transaction_cashdeposit WRITE,tbl_users as u READ, tbl_users WRITE,tbl_dmttransfer as r READ, tbl_dmttransfer  WRITE");
+        $query = DB::select(("SELECT SQL_NO_CACHE u.id,u.cd_balance,u.username,t.cd_closing from tbl_transaction_cashdeposit as t left JOIN tbl_users as u on t.uid=u.id where t.uid=".$reqData['uid']." and t.ttype in(".implode(",",$wttype).")  ORDER by t.id desc limit 1"));
+        $u_data =  $query[0];   
+         $stmtData['cd_opening']   =  $u_data->cd_balance;
+         $stmtData['cd_closing']   =  ($stmtData['cd_opening']-$agentcl);
+         if(count($query)!=0 && $u_data->cd_balance>=$agentcl){
+            if(self::roundval($u_data->cd_closing) == self::roundval($u_data->cd_balance)){
+                $cd_balance = $u_data->cd_balance - $agentcl;
+                $userupdate = ['cd_balance' => $cd_balance]; 
+                $isupdate = User::where('id', $reqData['uid'])->update($userupdate); 
+                if($isupdate){
+                    $insertedid = CashTransaction::insertGetId($stmtData);
+                    if($insertedid){
+                        $txnData["txnid"] = $insertedid; 
+                        $insTxn = Dmttransfer::insertGetId($txnData);
+                        if ($insTxn) { 
+                            $return = array("status" => 1,"txnno"=>$insertedid,"orderid"=>$insTxn,"balance"=>self::roundval($stmtData['cd_closing'],2), "message" => "Transaction Successfull");
+                        }else{
+                            $return = array("status" => 0, "message" => "Unable to insert transaction.");
+                        } 
+                    }else{
+                        $return		=	array("status"=>0,"message"=>"Unable to update ledger");
+                    }
+                }else{
+                    $return		=	array("status"=>0,"message"=>"Unable to update balance");
+                }
+            }else{
+                $return		=	array("status"=>0,"message"=>"Transaction cannot process. API Partner wallet mis-matched");
+            }
+         }else{
+            $return		=	array("status"=>0,"message"=>"Do not have sufficient balance.Please Request Fund.");
+         }   
+         DB::unprepared("UNLOCK TABLES"); 
+        return $return;
+    }
+
+    private static function calgst($reqData){
+		$bankcharge		=	1;
+		$amount			=	$reqData['amount'];
+		$customercharge	=	0;
+		$bankrevenue	=	0;
+		$gst			=	0;
+		$rnficharge		=	$reqData['rnficharge'];
+		$apicomm		=	0;
+		$apigst			=	0;
+		$apiinvoiceamt	=	0;
+		$tds			=	0;
+		$apinetaftertds	=	0;
+		$txncost		=	0;
+		$aftergstinvoice=	0;
+		
+		if($reqData['amount'] <= 1000){
+		    $customercharge	=	10;
+		}else{
+		    $customercharge	=	$amount*$bankcharge/100;
+		}
+		
+		$bankrevenue	=	round($customercharge / 1.18,2);
+		$gst			=	round($customercharge - $bankrevenue,2);
+		
+		
+		
+		$apicomm		=	$bankrevenue - $rnficharge;
+		
+		if($apicomm < 0){
+			$apicomm	=	0;
+		}
+		$tds			=	round($apicomm * 0,2);
+		if($tds < 0){
+			$tds		=	0;
+		}		
+		$apinetaftertds		=	$apicomm - $tds;
+		if($apinetaftertds < 0){
+			$apinetaftertds	=	0;
+		}
+		//$txncost			=	$apicomm + $tds;
+		$txncost			=	$gst + $tds + $rnficharge;
+		$aftergstinvoice	=	$txncost - $apigst;
+		return	array(
+			"bankcharge"    =>  $bankcharge." %",
+			"amount"        =>  $amount,
+			"customercharge"=>  $customercharge,
+			"bankrevenue"   =>  $bankrevenue,
+			"gst"           =>  $gst,
+			"rnficharge"    =>  $rnficharge,
+			"apicomm"       =>  $apicomm,
+			"apigst"        =>  $apigst, 
+			"tds"           =>  $tds,
+			"apinetaftertds"=>  $apinetaftertds,
+			"txncost"       =>  $txncost,
+			"aftergstinvoice"=>$aftergstinvoice,
+		);
+	}
 }

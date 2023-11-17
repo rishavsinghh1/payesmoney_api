@@ -30,10 +30,7 @@ trait CommissionTrait
           $qr = $query->get()->toArray();
           $records    = $qr;
           return $records; 
-     }
-
-   
-
+   }
    public static function getuser($search){
       $where = $search;
       unset($where['username']);
@@ -274,8 +271,7 @@ trait CommissionTrait
           return true;
       }
   } 
-  public static function walletttype($type)
-  {
+  public static function walletttype($type){
       $all    =    array(
           "main"=>array(0,1,3,4,5,6,7,8,9,11,12,13,14,23,25),
           "cash"=>array(7,11,13,100,101,102,103,104),

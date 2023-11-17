@@ -51,8 +51,7 @@ class Prepaidrecharge extends Controller
                 }
                 $getunique = $unique;
                 if(!empty($getunique)){
-                    if(!empty($operator)){
-                       
+                    if(!empty($operator)){ 
                         $ins_array  =   array(
                             "uid"           =>  $userdata->id,
                             "sdid"          =>  $userdata->supdistributor,

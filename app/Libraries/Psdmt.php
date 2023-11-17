@@ -130,6 +130,29 @@ class Psdmt{
        
        return self::hitting($data);
     } 
+    public static function transact($request){ 
+        $data = [
+            'method' => 'POST', 
+            'apiname'=> 'transactaction',
+            'url'    => static::$liveurl.'dmt/transact', 
+            'parameter' => [ 
+                    'mobile'    => $request['mobile'],  
+                    'referenceid' => $request['referenceid'],
+                    'pipe' =>  $request['pipe'],
+                    'pincode' => $request['pincode'],
+                    'address' => $request['address'],
+                    'dob' => $request['dob'],
+                    'state' => $request['gst_state'],
+                    'bene_id' => $request['bene_id'],
+                    'channel' => $request['txntype'],
+                    'amount' => $request['amount'],
+                    "latlong"=>"28.40,99.444",
+                    'reqId'     =>  self::randString(14)        
+            ] 
+        ];  
+       return self::hitting($data);
+    }
+    
     public static function randString($length, $charset='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789')
     {
         $str = '';
