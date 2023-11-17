@@ -228,7 +228,12 @@ class LoginController extends Controller
          )));
          Otp::create(['name' => $req['name'], 'status' => 1, 'otptype' => $req['otptype'], 'otp' => $otp]);
         }else{
-            $otp = 1234;
+            $otp = rand(0000,9999);
+            dd($otp);
+            Sms::sendMSG91sms(array("template"=>"otp","message"=>array(
+                "mobiles"=>"91".$req['phone'],
+                "otp"=> $otp 
+         )));
        
             Otp::create(['name' => $req['name'], 'status' => 1, 'otptype' => $req['otptype'], 'otp' => $otp]);
         }

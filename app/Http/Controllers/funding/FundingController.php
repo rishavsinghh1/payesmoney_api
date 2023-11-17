@@ -551,7 +551,7 @@ class FundingController extends Controller
                             return $q;
                         }); 
 
-                     $query->where('users.role',5);
+                    //  $query->where('users.role',5);
                     if ($status != "" ) {
                         $query->where('creditrequest.status',$status);
                     }

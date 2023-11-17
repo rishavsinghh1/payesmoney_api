@@ -14,7 +14,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use App\Models\Userloginlog;
+use App\Libraries\Common\Sms;
 use App\Models\Permission;
+use App\Libraries\Whatsapplib;
 class ResetController extends Controller
 {
     use CommonTrait;
@@ -97,18 +99,40 @@ class ResetController extends Controller
             } else {
                 $credentials['email'] = trim($request->email);
             }
-            $chkUser = User::select(is_numeric($request->email) ? 'phone' : 'email')->where($credentials)->first();
+            $chkUser = User::select(is_numeric($request->email) ? 'phone' : 'email','phone')->where($credentials)->first();
             //dd( $chkUser );
             if (empty($chkUser)) {
                 return $this->response('notvalid');
             }
-            $genOtp = sprintf("%04d", mt_rand(1, 9999));
-            // dd($genOtp);
+            $genOtp = sprintf("%04d", mt_rand(1, 9999)); 
             $otp = new Otp;
             $otp->otp = $genOtp;
             $otp->name = $request->email;
             $otp->status = 1;
             $otp->save();
+            // Sms::sendMSG91sms(array("template"=>"otp","message"=>array(
+            //     "mobiles"=>"91".$chkUser->phone,
+            //     "otp"=> $genOtp 
+            // )));
+            $d=[
+                'api_token'=>'94d83070-4097-4409-938d-5b9583d037f4',
+                'mobile'=>'91'.$chkUser->phone,
+                'message'=> urlencode("
+                    Dear .$request->email. ,
+                        The One Time Password (OTP) for your transaction at Payes Money of Reset Password with your Account " . $request->email . " is " . $genOtp . ".
+
+                        This OTP is valid for 10 minutes or 1 successful attempt, whichever is earlier. Please note that this OTP is valid only for this transaction and cannot be used for any other transaction.
+
+                        Please do not share this One Time Password with anyone.
+
+                        To know more, please visit FAQ
+
+                        In case you have not requested for OTP, please contact the Best Api helpline at +91 11 6931 2750.
+
+                        Warm Regards
+                        Best Api ")
+            ];
+            $data=  Whatsapplib::doSentMessage($d);
             return $this->response('success', ['message' => 'Otp send successfully', 'otp' => $genOtp]);
         } catch (\Throwable $th) {
             return $this->response('internalservererror', ['message' => $th->getMessage()]);
@@ -136,11 +160,11 @@ class ResetController extends Controller
             $Otp = $request->otp;
             // echo($Otp);
             $geneOtp = Otp::select('id', 'name', 'otp', 'status', 'created_at')->where('name', $request->email)->orderBy('created_at', 'desc')->first();
-            // echo($geneOtp->otp);die;
+          
             $userdetails = User::select('*')->where($credentials)->first();
             
             $token = Auth::login($userdetails);
-            
+         
             if (!empty($geneOtp)) {
                 if ($geneOtp->otp == $Otp) {
                     if($geneOtp->status == 1){
@@ -155,7 +179,19 @@ class ResetController extends Controller
                             $UserPasswordReset->token = $resetToken;
                             $UserPasswordReset->save();
                             $link = env('FRONT_URL').'auth/change-password?token='.$resetToken;
-                            return $this->response('success', ['message' => 'Password reset link sent on your email.', 'link' => $link]);
+                            $d=[
+                                'api_token'=>'94d83070-4097-4409-938d-5b9583d037f4',
+                                'mobile'=>'91'.$userdetails->phone,
+                                'message'=> urlencode("Dear ".$userdetails->firmname.",
+
+                                Please click link to reset your password:".$link."In case you have not requested for OTP, please contact the Best Api helpline at +91 11 6931 2750.
+
+
+                                Warm Regard
+                                Best Api")
+                            ];
+                            $data=  Whatsapplib::doSentMessage($d);
+                            return $this->response('success', ['message' => 'Password reset link sent on your Whatsapp & email.', 'link' => $link]);
                         }else{
                             $otp = Otp::where('id', $geneOtp->id)->update(['status' => 0]);
                         }
@@ -242,7 +278,7 @@ class ResetController extends Controller
                 'email' => 'required',
                 'otp' => 'required',
                 'password' => ['required', 'confirmed', Password::min(8), 'regex:/^(?=.*[a-z]){2,}(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/'],
-                'confpassword' => ['required', 'confirmed', Password::min(8), 'regex:/^(?=.*[a-z]){2,}(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/'],
+                'password_confirmation' => ['required', 'confirmed', Password::min(8), 'regex:/^(?=.*[a-z]){2,}(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/'],
                 'password.regex' => 'Password must be of 8 characters Atleast 1 alphabets must be in upper case Atleast 1 letters must be in lower case Must be atleast 1 numeric.'
             ];
             $messagesArray = [

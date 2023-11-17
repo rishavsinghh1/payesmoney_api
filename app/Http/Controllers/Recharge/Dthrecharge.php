@@ -41,6 +41,14 @@ class Dthrecharge extends Controller
                 $amount     =   $request->amount;
                 $unique     =   $request->referenceid; 
                 $operator   =   Rechargeoperator::select("*")->where("status",1)->where("op_id",$request->operator)->first(); 
+                $previousrecharge = RechargeTrait::previousrecharge($request['mobile'], $request['operator'], $request['amount']);
+                if ($previousrecharge > 0) { 
+                    $response = [
+                        'errors' => "invalid!",  
+                        "message" => "Same Transaction allowed after 5 min.", 
+                    ];
+                    return $this->response('notvalid', $response);  
+                }
                 $getunique = $unique; 
                 if(!empty($getunique)){
                    if(!empty($operator)){ 
@@ -68,15 +76,14 @@ class Dthrecharge extends Controller
                             ->update(["status" => 1]);  
                             if($update_request==1){
                                 $reqData = array(
-                                    'operator'      =>  $name = str_replace(' ', '_',$operator->op_id),
+                                    'operator'      =>  $operator->op_id,
                                     'canumber'      =>  $ins_array['canumber'],
                                     'amount'        =>  $ins_array['amount'],
                                     'referenceid'   =>  $request->referenceid,
                                     'apiname'       => 'DTH Recharge',
                                     'method'        => 'POST'
-                                );
-                               
-                               $rs = Rechargelib::doDthrecharge($reqData);
+                                );  
+                               $rs = Rechargelib::doDthrecharge($reqData); 
                                if(isset($rs['statuscode'])){
                                     if($rs['statuscode']==0){
                                                 $update_request = Recharge::where("id", $requestdata['orderid'])
